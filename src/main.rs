@@ -1,63 +1,61 @@
+use std::io;
+use std::io::prelude::*;
+use std::collections::HashMap;
+// pub makes an item visible within the provided path. 
+pub mod parser;
 
 
+fn evaluate(input: &str, env: &mut HashMap<String f64>) -> Result<f64, String> {
+    let mut p = parser::Parser::new(input);
+    let ast = try!(p.parse());
+    match ast.eval(env) {
+        Some(result) => Ok(result),
+        None => Err("No value for that expression!".to_string())
+    }
+}
 
-fn main() {
+
+pub fn main() {
+    use std::f64;
+    let mut env = HashMap::new();
+    env.insert("wow".to_string(), 35.0f64);
+    env.insert("pi".to_string(), f64::const::PI);
+
+    let stdin = io::stdin();
 
     loop {
-        println!("Enter input: ");
+        print!(">> ");
+        io::stdout().flush().ok();
+
         let mut input = String::new();
-        io::stdin().read_line(&mut input)
-            .expect("Failed to read line");
-        let tokens = tokenize(input);
-        let stack = shunt(tokens);
-        let res = calculate(stack);
-        println!("{}", res);
-    }
-}
 
-#[derive(Debug)]
-#[derive(PartialEq)]
-enum Token {
-    Number (i64),
-    Plus,
-    Sub,
-    Mul,
-    Div,
-    LeftParen,
-    RightParen,
-}
+        // the below match block is a error handling mechanism with the Result type. Ok() representing success, Err() representing error and containing an error error
+        match stdin.read_line(&mut input) {
+            Ok(_) => {
+                if input.len() == 0 {
+                    println!("");
+                    return ;
+                }
 
-// Tokenizes the input string into a Vec to Tokens
-fn tokenize(mut input: String) -> Vec<Token> {
-    lazy_static! {
-        static ref NUMBER_RE: Regex = Regex::new(r"^[0-9]+").unwrap();
-    }
-    let mut res = vec![];
-    while !(input.trim_left().is_empty()){
-        input = input.trim_left().to_string();
-        input = if let Some((_, end)) = NUMBER_RE.find(&input) {
-            let (num, rest) = input.split_at_mut(end);
-            res.push(Token::Number(num.parse::<i64>().unwrap()));
-            rest.to_string()
-        } else {
-            res.push(match input.chars().nth(0) {
-                Some('+') => Token::Plus,
-                Some('-') => Token::Sub,
-                Some('*') => Token::Mul,
-                Some('/') => Token::Div,
-                Some('(') => Token::LeftParen,
-                Some(')') => Token::RightParen,
-                _ => panic!("Unknown character!")
-            });
-            input.trim_left_matches(|c| c == '+' ||
-                                        c == '-' ||
-                                        c == '*' ||
-                                        c == '/' ||
-                                        c == '(' ||
-                                        c == ')').to_string() 
+                let expression_text = input.trim_right();
+
+                let result = evaluate(expression_text, &mut env);
+                match result {
+                    Ok(value) => {
+                        println!("=> {}", value);
+                    }
+                    Err(s) => {
+                        println!("Error: {}", s);
+                    }
+                }
+                io::stdout().flush().ok();
+            }
+            Err(_) => {
+                println!("");
+                return;
+            }
         }
     }
 }
-
 
 
