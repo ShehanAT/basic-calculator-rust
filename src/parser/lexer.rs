@@ -37,7 +37,51 @@ impl Lexer {
                 let start = self.pos;
                 let mut end = start + 1;
                 self.bump();
+                while (self.curr.is_digit(10) || self.curr == '.') && !self.eof{
+                    self.bump();
+                    end += 1;
+                }
+                Ok(NUMBER(self.src[start..end].parse::<f64>().unwrap()))
             }
+            c if c.is_alphabetic() => {
+                let start = self.pos;
+                let mut end = start + 1;
+                self.bump();
+                while self.curr.is_alphabetic() && !self.eof {
+                    self.bump();
+                    end += 1;
+                }
+                Ok(SYMBOL(self.src[start..end].to_string()))
+            }
+            '+' => {self.bump(); Ok(ADD)}
+            '-' => {self.bump(); Ok(SUB)}
+            '*' => {self.bump(); Ok(MUL)}
+            '/' => {self.bump(); Ok(DIV)}
+            '^' => {self.bump(); Ok(EQUALS)}
+            '=' => {self.bump(); Ok(EQUALS)}
+            c => { Err(format!("unexpected token {} at position {}", c, self.pos)) }
         }
+    }
+
+    pub fn bump(&mut self) {
+        self.pos += 1;
+        if self.pos >= self.src.len() {
+            self.eof = true;
+            return;
+        }
+        self.curr = self.src.chars().nth(self.pos).unwrap();
+    }
+    // The 'pub' keyword is used to make any function public 
+    pub fn consume_whitespace(c: char) -> bool {
+        match c {
+            ' ' | '\n' | '\t' => true,
+            _ => false
+        }
+    }
+}
+
+impl fmt::Display for Lexer {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.src)
     }
 }

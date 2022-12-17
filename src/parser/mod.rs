@@ -35,6 +35,8 @@ impl Parser {
             if token::is_eof(&curr) {
                 break;
             }
+            let info_tuple = curr.info();
+
         }
         
     }
