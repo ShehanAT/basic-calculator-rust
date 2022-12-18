@@ -36,8 +36,37 @@ impl Parser {
                 break;
             }
             let info_tuple = curr.info();
+            if info_tuple.is_none() {
+                break;
+            }
+            let (op_prec, op_assoc) = info_tuple.unwrap();
+            if op_prec < prec {
+                break;
+            }
+            try!(self.next_token());
+            match op_assoc {
+                0 => {
+                    rhs = try!(self.expr(op_prec + 1));
+                }
+                _ => {
+                    rhs = try!(self.expr(op_prec));
+                }
+            }
+            lhs = self.op(curr, lhs, rhs);
 
         }
-        
+        Ok(lhs)
+    }
+
+    pub fn atom(&mut self) -> Result<Box<ast::Node>, String> {
+        match try!(self.peek_token()){
+            EOF => { Ok(Box::new(ast::Num {num: 0f64 }))}
+            LPAREN => {
+                try!(self.expect('(')));
+                let e = try!(self.expr(1));
+                try!(self.expect(')'));
+                Ok(e) 
+            }
+        }
     }
 }
