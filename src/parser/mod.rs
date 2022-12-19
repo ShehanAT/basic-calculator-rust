@@ -62,7 +62,7 @@ impl Parser {
         match try!(self.peek_token()){
             EOF => { Ok(Box::new(ast::Num {num: 0f64 }))}
             LPAREN => {
-                try!(self.expect('(')));
+                try!(self.expect('('));
                 let e = try!(self.expr(1));
                 try!(self.expect(')'));
                 Ok(e) 
@@ -150,8 +150,23 @@ impl Parser {
                     arg: arg
                 })
             }
-            "sqrt | SQRT" => {
-                // Box::new( ast::sqrt)
+            "sqrt" | "SQRT" => {
+                Box::new( ast::Sqrt {
+                    arg: arg
+                })
+            }
+            "cos" | "cosine" => {
+                Box::new( ast::Cos {
+                    arg: arg
+                })
+            }
+            "print" => {
+                Box::new( ast::Print {
+                    arg: arg
+                })
+            }
+            _ => {
+                panic!("Unrecognized function!");
             }
         }
     }
