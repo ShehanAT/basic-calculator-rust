@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+use std::f64::consts::PI;
 use std::io;
 use std::io::prelude::*;
 use std::collections::HashMap;
@@ -7,7 +9,7 @@ pub mod parser;
 
 fn evaluate(input: &str, env: &mut HashMap<String f64>) -> Result<f64, String> {
     let mut p = parser::Parser::new(input);
-    let ast = try!(p.parse());
+    let ast = p.parse()?;
     match ast.eval(env) {
         Some(result) => Ok(result),
         None => Err("No value for that expression!".to_string())

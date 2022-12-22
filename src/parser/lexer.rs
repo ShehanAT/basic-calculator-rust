@@ -80,6 +80,13 @@ impl Lexer {
     }
 }
 
+pub fn is_whitespace(c) -> bool {
+    match c {
+        ' ' | '\n' | '\t' => true,
+        _ => false 
+    }
+}
+
 impl fmt::Display for Lexer {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.src)

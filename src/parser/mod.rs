@@ -22,15 +22,15 @@ impl Parser {
         p
     }
 
-    pub fn parse(&mut self) -> Result<Box<ast::Node>, String> {
+    pub fn parse(&mut self) -> Result<Box<dyn ast::Node>, String> {
         self.expr(1)
     }
 
-    pub fn expr(&mut self, prec: usize) -> Result<Box<ast::Node>, String> {
-        let mut lhr = try!(self.atom());
+    pub fn expr(&mut self, prec: usize) -> Result<Box<dyn ast::Node>, String> {
+        let mut lhr = self.atom()?;
         let mut rhs;
         loop {
-            let curr = try!(self.peek_token());
+            let curr = self.peek_token()?;
 
             if token::is_eof(&curr) {
                 break;
@@ -43,50 +43,50 @@ impl Parser {
             if op_prec < prec {
                 break;
             }
-            try!(self.next_token());
+            self.next_token()?;
             match op_assoc {
                 0 => {
-                    rhs = try!(self.expr(op_prec + 1));
+                    rhs = self.expr(op_prec + 1)?;
                 }
                 _ => {
-                    rhs = try!(self.expr(op_prec));
+                    rhs = self.expr(op_prec)?;
                 }
             }
-            lhs = self.op(curr, lhs, rhs);
+            lhr = self.op(curr, lhr, rhs);
 
         }
-        Ok(lhs)
+        Ok(lhr)
     }
 
-    pub fn atom(&mut self) -> Result<Box<ast::Node>, String> {
-        match try!(self.peek_token()){
+    pub fn atom(&mut self) -> Result<Box<dyn ast::Node>, String> {
+        match self.peek_token()?{
             EOF => { Ok(Box::new(ast::Num {num: 0f64 }))}
             LPAREN => {
-                try!(self.expect('('));
-                let e = try!(self.expr(1));
-                try!(self.expect(')'));
+                self.expect('(')?;
+                let e = self.expr(1)?;
+                self.expect(')')?;
                 Ok(e) 
             }
             NUMBER(val) => {
-                try!(self.next_token());
+                self.next_token()?;
                 Ok(Box::new(ast::Num { num: val }))
             }
             SYMBOL(val) => {
                 // Only allows math functions for now, no variables 
-                try!(self.next_token());
-                match try!(self.peek_token()) {
+                self.next_token()?;
+                match self.peek_token()? {
                     LPAREN => {
-                        try!(self.expect('('));
-                        let e = try!(self.expr(1));
-                        try!(self.expect(')'));
+                        self.expect('(')?;
+                        let e = self.expr(1)?;
+                        self.expect(')')?;
                         Ok(self.function(val,e))
                     }
                     SYMBOL(name) => {
                         match &val[..] {
                             "let" => {
-                                try!(self.next_token());
-                                try!(self.expect('='));
-                                let expr = try!(self.expr(1));
+                                self.next_token()?;
+                                self.expect('=')?;
+                                let expr = self.expr(1)?;
                                 Ok(Box::new( ast::Assignment { name: name, value: expr }))
                             }
                             _ => {
@@ -105,7 +105,7 @@ impl Parser {
         }
     }
 
-    pub fn op(&self, op: token::Token, lhs: Box<ast::Node>, rhs: Box<ast::Node>) -> Box<ast::Node> {
+    pub fn op(&self, op: token::Token, lhs: Box<dyn ast::Node>, rhs: Box<dyn ast::Node>) -> Box<dyn ast::Node> {
         match op {
             ADD => {
                 Box::new(ast::Add {
@@ -143,7 +143,7 @@ impl Parser {
         }
     }
 
-    pub fn function<'a>(&'a self, op: String, arg: Box<ast::Node>) -> Box<ast::Node> {
+    pub fn function<'a>(&'a self, op: String, arg: Box<dyn ast::Node>) ->  Box<dyn ast::Node> {
         match &op[..] {
             "sin" | "sine" => {
                 Box::new( ast::Sin {
@@ -175,7 +175,7 @@ impl Parser {
 
 impl Parser {
     pub fn expect(&mut self, tok: char) -> Result<(), String> {
-        try!(self.next_token());
+        self.next_token()?;
         if self.current.to_char() != tok {
             return Err(format!("expected {:} but found {}", tok, self.current_to_char()));
         }
@@ -184,7 +184,7 @@ impl Parser {
 
     pub fn peek_token(&mut self) -> Result<token::Token, String> {
         if self.peeked.is_none() {
-            self.peeked = Some(try!(self.lexer.next_token()));
+            self.peeked = Some(self.lexer.next_token()?);
         }
 
         Ok(self.peeked.clone().unwrap())
@@ -196,7 +196,7 @@ impl Parser {
                 self.current = pk.clone();
             }
             None => {
-                self.current = try!(self.lexer.next_token());
+                self.current = self.lexer.next_token()?;
             }
         }
         self.peeked = None;
