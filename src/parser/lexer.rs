@@ -1,12 +1,12 @@
 use std::fmt;
-use parser::token;
-use parser::token::Token::*;
+use crate::parser::token;
+use crate::parser::token::Token::*;
 
 pub struct Lexer {
-    pub curr: char,
-    pub pos: usize, 
+    pub curr:  char,
+    pub pos: usize,
     pub src: String,
-    pub eof: bool 
+    pub eof: bool
 }
 
 impl Lexer {
@@ -24,15 +24,14 @@ impl Lexer {
         }
         l
     }
-
     pub fn next_token(&mut self) -> Result<token::Token, String> {
         if self.eof {
             return Ok(EOF);
         }
         self.consume_whitespace();
         match self.curr {
-            '(' => { self.bump(); Ok(LPAREN) }
-            ')' => { self.bump(); Ok(RPAREN) }
+            '(' => {self.bump(); Ok(LPAREN)}
+            ')' => {self.bump(); Ok(RPAREN)}
             c if c.is_digit(10) => {
                 let start = self.pos;
                 let mut end = start + 1;
@@ -57,12 +56,11 @@ impl Lexer {
             '-' => {self.bump(); Ok(SUB)}
             '*' => {self.bump(); Ok(MUL)}
             '/' => {self.bump(); Ok(DIV)}
-            '^' => {self.bump(); Ok(EQUALS)}
+            '^' => {self.bump(); Ok(CARET)}
             '=' => {self.bump(); Ok(EQUALS)}
             c => { Err(format!("unexpected token {} at position {}", c, self.pos)) }
         }
     }
-
     pub fn bump(&mut self) {
         self.pos += 1;
         if self.pos >= self.src.len() {
@@ -71,21 +69,20 @@ impl Lexer {
         }
         self.curr = self.src.chars().nth(self.pos).unwrap();
     }
-    // The 'pub' keyword is used to make any function public 
-    pub fn consume_whitespace(c: char) -> bool {
-        match c {
-            ' ' | '\n' | '\t' => true,
-            _ => false
+
+    pub fn consume_whitespace(&mut self) {
+        while is_whitespace(self.curr) {
+            self.bump();
         }
     }
 }
-
-pub fn is_whitespace(c) -> bool {
+pub fn is_whitespace(c: char) -> bool {
     match c {
         ' ' | '\n' | '\t' => true,
-        _ => false 
+        _ => false
     }
 }
+
 
 impl fmt::Display for Lexer {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

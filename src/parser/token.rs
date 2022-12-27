@@ -1,7 +1,7 @@
 use self::Token::*;
 
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug,PartialEq, Clone)]
 pub enum Token {
     LPAREN,
     RPAREN,
@@ -17,13 +17,13 @@ pub enum Token {
 }
 
 impl Token {
-    /* returns (prec, associativity) where 0 is left and 1 is right  */
+    /* returns (prec, associativity) where 0 is left and 1 is right*/
     pub fn info(&self) -> Option<(usize, usize)> {
         match *self {
             ADD | SUB => Some((10, 0)),
             MUL | DIV => Some((20, 0)),
             CARET => Some((30, 1)),
-            _ => { None }
+            _ => { None}
         }
     }
 
@@ -50,5 +50,3 @@ pub fn is_eof(t: &Token) -> bool{
         _ => false
     }
 }
-
-
