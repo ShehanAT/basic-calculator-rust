@@ -1,3 +1,4 @@
+use iced::Renderer;
 use iced::alignment;
 use iced::executor;
 use iced::theme::{self, Theme};
@@ -6,7 +7,7 @@ use iced::widget::{button, column, container, row, text};
 use iced::{
     Alignment, Application, Command, Element, Length, Settings, Subscription,
 };
-
+use iced_native;
 use std::time::{Duration, Instant};
 use std::cell::Cell;
 
@@ -14,12 +15,24 @@ pub fn main() -> iced::Result {
     Stopwatch::run(Settings::default())
 }
 
+// #[derive(Debug)]
 struct Stopwatch {
     duration: Duration,
     state: State,
-    input_string: Cell<String>,
+    // input_string: Cell<String>,
+    input_string: InputString,
+    // input_string: str,
+
 }
 
+#[derive(Debug)]
+struct InputString {
+    input_string: String,
+}
+
+// impl Copy for Cell<String> {}
+
+// #[derive(Debug, Clone)]
 enum State {
     Idle,
     Ticking { last_tick: Instant },
@@ -52,7 +65,11 @@ impl Application for Stopwatch {
             Stopwatch {
                 duration: Duration::default(),
                 state: State::Idle,
-                input_string: Cell::new("".to_string()),
+                input_string: InputString { input_string: 
+                    // Cell::new("".to_string()) 
+                    String::from("".to_string())
+                },
+                // input_string: String::new().as_str(),
             },
             Command::none(),
         )
@@ -84,19 +101,25 @@ impl Application for Stopwatch {
                 self.duration = Duration::default();
             }
             Message::One => {
-                *self.input_string.get_mut() += "1";
+                // *self.input_string.input_string.get_mut() += "1";
+                self.input_string.input_string += "1";
+                // self.input_string.input_string += "1";
             }
             Message::Two => {
-                *self.input_string.get_mut() += "2";
+                // *self.input_string.input_string.get_mut() += "2";
+                self.input_string.input_string += "2";
             }
             Message::Three => {
-                *self.input_string.get_mut() += "3";
+                // *self.input_string.input_string.get_mut() += "3";
+                self.input_string.input_string += "3";
             }
             Message::Add => {
-                *self.input_string.get_mut() += "+";
+                // *self.input_string.input_string.get_mut() += "+";
+                self.input_string.input_string += "+";
             }
             Message::Subtract => {
-                *self.input_string.get_mut() += "-";
+                // *self.input_string.input_string.get_mut() += "-";
+                self.input_string.input_string += "-";
             }
             _ => self.duration = Duration::default()
         }
@@ -105,7 +128,8 @@ impl Application for Stopwatch {
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        println!("Input String: {:?}", self.input_string.get_mut());
+        // let input_string = self.input_string.input_string
+        println!("Input String: {}", self.input_string.input_string);
         match self.state {
             State::Idle => Subscription::none(),
             State::Ticking { .. } => {
@@ -185,5 +209,14 @@ impl Application for Stopwatch {
             .center_y()
             .into()
     }
+
+    fn theme(&self) -> Self::Theme {
+        Self::Theme::default()
+    }
+
+    fn style(&self) -> <Self::Theme as iced::application::StyleSheet>::Style {
+        <Self::Theme as iced::application::StyleSheet>::Style::default()
+    }
+  
 
 }
