@@ -1,4 +1,3 @@
-use iced::Renderer;
 use iced::alignment;
 use iced::executor;
 use iced::theme::{self, Theme};
@@ -7,9 +6,7 @@ use iced::widget::{button, column, container, row, text};
 use iced::{
     Alignment, Application, Command, Element, Length, Settings, Subscription,
 };
-use iced_native;
 use std::time::{Duration, Instant};
-use std::cell::Cell;
 
 
 use std::io;
@@ -48,7 +45,7 @@ impl CalculatorLogic {
         }
     }
 
-    async fn evaluate_expr(input_string: str) {
+    async fn evaluate_expr(input_string: &str) {
         use std::f64;
         let mut env = HashMap::new();
         env.insert("wow".to_string(), 35.0f64);
@@ -60,9 +57,9 @@ impl CalculatorLogic {
     
         // stdin.read_line(&mut print_str);
     
-        match stdin.read_line(&mut input) {
-            // println!("Input: {}", print_str);
-            Ok(_) => {
+        // match stdin.read_line(&mut String::from(&mut *input)) {
+        //     // println!("Input: {}", print_str);
+        //     Ok(_) => {
     
                 if input.len() == 0 {
                     println!("");
@@ -72,7 +69,7 @@ impl CalculatorLogic {
                 let expression_text = input.trim_right();
     
                 let result = Self::evaluate(expression_text, &mut env);
-                match result {
+                match result.await {
                     Ok(value) => {
                         println!("=> {}", value);
                     }
@@ -81,16 +78,16 @@ impl CalculatorLogic {
                     }
                 }
                 io::stdout().flush().ok();
-            }
-            Err(_) => {
-                println!("");
-                return;
-            }
-        }
+        //     }
+        //     Err(_) => {
+        //         println!("");
+        //         return;
+        //     }
+        // }
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct InputString {
     input_string: String,
 }
@@ -102,6 +99,12 @@ enum State {
     Idle,
     Ticking { last_tick: Instant },
     
+}
+
+#[derive(Debug, Clone)]
+enum Error {
+    APIError,
+    LanguageError,
 }
 
 #[derive(Debug, Clone)]
@@ -118,8 +121,23 @@ enum Message {
     Two,
     Three,
     Evaluate,
-    Done,
+    Done(Result<Status, Error>),
 }
+
+#[derive(Debug, Clone)]
+enum Status {
+    Success,
+    Fail,
+}
+
+// impl FnOnce<((),)> for Status {
+//     type Output;
+
+//     extern "rust-call" fn call_once(self, args: ((),)) -> Self::Output where
+//     Self : Sized,
+// ;
+// }
+
 
 impl Application for Stopwatch {
     type Message = Message;
@@ -138,9 +156,9 @@ impl Application for Stopwatch {
                 },
                 // input_string: String::new().as_str(),
             },
-            // Command::none(),
-            Command::perform(CalculatorLogic::evaluate_expr(""), Message::Done),
+            Command::none()
         )
+       
     }
 
     fn title(&self) -> String {
@@ -189,9 +207,17 @@ impl Application for Stopwatch {
                 // *self.input_string.input_string.get_mut() += "-";
                 self.input_string.input_string += "-";
             }
-            Message::Evaluate => {
-                Command::perform(CalculatorLogic::evaluate_expr(self.input_string.input_string), Message::Done)
-            }
+            // Message::Done(Ok(_)) => {
+            //     Command::none();
+            // }
+            // Message::Done(Err(_error)) => {
+            //     Command::none();
+            // }
+            Message::Evaluate => async {
+                let result = CalculatorLogic::evaluate_expr(&self.input_string.input_string).await;
+                println!("{:?}", result);
+                // Command::perform(CalculatorLogic::evaluate_expr(&self.input_string.input_string), Message::Done);
+            },
             _ => self.duration = Duration::default()
         }
 
@@ -294,7 +320,6 @@ impl Application for Stopwatch {
     fn style(&self) -> <Self::Theme as iced::application::StyleSheet>::Style {
         <Self::Theme as iced::application::StyleSheet>::Style::default()
     }
-  
 
 }
 
