@@ -19,18 +19,29 @@ pub fn file<I: 'static + Hash + Copy + Send + Sync, T: ToString>(
     })
 }
 
-pub fn download_start_calculating<I: 'static + Hash + Copy + Send + Sync, T: ToString>(
-    id: I, 
-    input_string: T,
-) -> iced::Subscription<(I, Progress)> {
-    // println!("Passing download_start_calculating(), id: {:?}, input_string: {:?}", id, input_string.to_string());
-    subscription::unfold(id, CalculatorState::Ready(input_string.to_string()), move |state| {
-        println!("Passing subscription::unfold");
-        calculate(id, state);
-        // download(id, state)
-    })
-}
+// pub fn download_start_calculating<I: 'static + Hash + Copy + Send + Sync, T: ToString>(
+//     id: I, 
+//     input_string: T,
+// ) -> iced::Subscription<(I, Progress)> {
+//     // println!("Passing download_start_calculating(), id: {:?}, input_string: {:?}", id, input_string.to_string());
+//     subscription::unfold(id, CalculatorState::Ready(input_string.to_string()), move |state| {
+//         println!("Passing subscription::unfold");
+//         calculate(id, state);
+//         // download(id, state)
+//     })
+// }
 
+// pub fn download_start_calculating<I: 'static + Hash + Copy + Send + Sync, T: ToString>(
+//     id: I, 
+//     input_string: T,
+// ) -> iced::Subscription<(I, Progress)> {
+//     subscription::run(id, stream)
+//     // subscription::run(id, CalculatorState::Ready(input_string.to_string()), move |state| {
+//     //     println!("Passing subscription::unfold");
+//     //     calculate(id, state);
+//     //     // download(id, state)
+//     // })
+// }
 
 #[derive(Debug, Hash, Clone)]
 pub struct Download<I> {
@@ -65,26 +76,26 @@ async fn calculate<I: Copy>(
             }
 
         },
-        CalculatorState::Downloading { result } => {
-            let response = reqwest::get("https://file-examples.com/wp-content/uploads/2017/02/file-sample_1MB.doc").await;
+        // CalculatorState::Downloading { result } => {
+        //     let response = reqwest::get("https://file-examples.com/wp-content/uploads/2017/02/file-sample_1MB.doc").await;
 
-            match response {
-                Ok(response) => {
-                    if let Some(total) = response.content_length() {
-                        (
-                            Some((id, Progress::Started)),
-                            CalculatorState::Downloading { result: (0) }, 
-                            // Some((id, Progress::Finished)), State::Finished
-                            Some((id, Progress::CalculationFinished(result_output.unwrap().to_string()))), State::Finished
-                            // Some((id, Progress::CalculationFinished(result_output.unwrap_err())), State::Finished
-                        )
-                    } else {
-                        (Some((id, Progress::Errored)), State::Finished)
-                    }
-                }
-                Err(_) => (Some((id, Progress::Errored)), State::Finished),
-            }
-        },
+        //     match response {
+        //         Ok(response) => {
+        //             if let Some(total) = response.content_length() {
+        //                 (
+        //                     Some((id, Progress::Started)),
+        //                     CalculatorState::Downloading { result: (0) }, 
+        //                     // Some((id, Progress::Finished)), State::Finished
+        //                     Some((id, Progress::CalculationFinished(result_output.unwrap().to_string()))), State::Finished
+        //                     // Some((id, Progress::CalculationFinished(result_output.unwrap_err())), State::Finished
+        //                 )
+        //             } else {
+        //                 (Some((id, Progress::Errored)), State::Finished)
+        //             }
+        //         }
+        //         Err(_) => (Some((id, Progress::Errored)), State::Finished),
+        //     }
+        // },
 
         CalculatorState::Done(output_string) => {
             // CalculatorState::Done(output_string)
@@ -225,9 +236,9 @@ pub enum State {
 pub enum CalculatorState {
     Ready(String),
     Done(String),
-    Downloading {
-        result: f64,
-        // result: f64,
-    },
+    // Downloading {
+    //     result: f64,
+    //     // result: f64,
+    // },
     Finished,
 }
