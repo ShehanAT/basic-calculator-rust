@@ -4,7 +4,7 @@ use std::{hash::Hash, collections::HashMap};
 
 use std::io;
 use std::io::prelude::*;
-
+use std::fmt::Debug;
 use crate::parser;
 
 
@@ -18,10 +18,46 @@ pub fn file<I: 'static + Hash + Copy + Send + Sync, T: ToString>(
     })
 }
 
+pub fn download_start_calculating<I: 'static + Hash + Copy + Send + Sync, T: ToString>(
+    id: I,
+    input_string: T,
+) -> iced::Subscription<(I, Progress)> {
+    // println!("Passing download_start_calculating(), id: {:?}, input_string: {:?}", id, input_string.to_string());
+    subscription::unfold(id, State::Ready(input_string.to_string()), move |state| {
+        println!("Passing subscription::unfold");
+        calculate(id, State::Ready(input_string.to_string()));
+    })
+}
+
+
 #[derive(Debug, Hash, Clone)]
 pub struct Download<I> {
     id: I,
     url: String,
+}
+
+async fn calculate<I: Copy>(
+    id: I,
+    state: State,
+) -> (Option<(I, Progress)>, State) {
+    println!("Passing single_download.calculate()");
+    match state {
+        State::Ready(input_string) => {
+            
+            let result_output = evaluate_expr(&input_string).await;
+            // println!("{:?}", result_output.unwrap());
+            // let response = reqwest::get("https://speed.hetzner.de/100MB.bin?").await;
+
+            match result_output {
+                Ok(_) => (Some((id, Progress::CalculationFinished(result_output.unwrap().to_string()))), State::Finished),
+                Err(_) => (Some((id, Progress::CalculationFinished("Calculation Failed!".to_string()))), State::Finished),
+            }
+
+        }
+        State::Downloading { response, total, downloaded } => todo!(),
+        State::Finished => todo!(),
+    }
+
 }
 
 async fn download<I: Copy>(
