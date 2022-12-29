@@ -34,20 +34,22 @@ async fn download<I: Copy>(
             
             let result_output = evaluate_expr(&input_string).await;
             // println!("{:?}", result_output.unwrap());
-
             let response = reqwest::get("https://speed.hetzner.de/100MB.bin?").await;
 
             match response {
                 Ok(response) => {
                     if let Some(total) = response.content_length() {
                         (
-                            Some((id, Progress::Started)),
-                            State::Downloading {
-                                response,
-                                total,
-                                downloaded: 0,
-                                result: result_output.unwrap(),
-                            },
+                            // Some((id, Progress::Started)),
+                            // State::Downloading {
+                            //     response,
+                            //     total,
+                            //     downloaded: 0,
+                            //     // result: result_output.unwrap(),
+                            // },
+                            // Some((id, Progress::Finished)), State::Finished
+                            Some((id, Progress::CalculationFinished(result_output.unwrap().to_string()))), State::Finished
+                            // Some((id, Progress::CalculationFinished(result_output.unwrap_err())), State::Finished
                         )
                     } else {
                         (Some((id, Progress::Errored)), State::Finished)
@@ -60,7 +62,7 @@ async fn download<I: Copy>(
             mut response,
             total,
             downloaded,
-            result
+            // result
         } => match response.chunk().await {
             
             Ok(Some(chunk)) => {
@@ -74,7 +76,7 @@ async fn download<I: Copy>(
                         response,
                         total,
                         downloaded,
-                        result
+                        // result
                     },
                 )
             }
@@ -106,44 +108,24 @@ async fn evaluate_expr(input_string: &str) -> Result<f64, String> {
     env.insert("wow".to_string(), 35.0f64);
     env.insert("pi".to_string(), f64::consts::PI);
 
-    // let stdin = io::stdin();
+ 
+    print!(">> ");
+    
+
+    let mut input = input_string;
 
 
-    // loop {
-        print!(">> ");
-        // io::stdout().flush().ok();
+    let expression_text = input.trim_right();
 
-        let mut input = input_string;
-
-        // match stdin.read_line(&mut input) {
-        //     Ok(_) => {
-
-                // if input.len() == 0 {
-                //     println!("");
-                //     return; 
-                // }
-
-                let expression_text = input.trim_right();
-
-                let result = evaluate(expression_text, &mut env);
-                match result.await {
-                    Ok(value) => {
-                        // println!("=> {}", value);
-                        Ok(value)
-                    }
-                    Err(s) => {
-                        // println!("Error: {}", s);
-                        Err(s)
-                    }
-                }
-                // io::stdout().flush().ok();
-            // }
-            // Err(_) => {
-            //     println!("");
-            //     return;
-            // }
-        // }
-    // }
+    let result = evaluate(expression_text, &mut env);
+    match result.await {
+        Ok(value) => {
+            Ok(value)
+        }
+        Err(s) => {
+            Err(s)
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -151,6 +133,7 @@ pub enum Progress {
     Started,
     Advanced(f32),
     Finished,
+    CalculationFinished(String),
     Errored,
 }
 
@@ -160,7 +143,7 @@ pub enum State {
         response: reqwest::Response,
         total: u64,
         downloaded: u64,
-        result: f64,
+        // result: f64,
     },
     Finished,
 }

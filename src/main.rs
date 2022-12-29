@@ -104,9 +104,10 @@ struct Download {
 #[derive(Debug)]
 enum State {
     Idle,
-    Downloading { progress: f32 },
+    Downloading { progress: f32, input_string: String },
     Finished,
     Errored,
+    CalculatorEvaluating
 }
 
 impl Download {
@@ -122,14 +123,14 @@ impl Download {
             State::Idle { .. }
             | State::Finished { .. }
             | State::Errored { .. } => {
-                self.state = State::Downloading { progress: 0.0 };
+                self.state = State::Downloading { progress: 0.0, input_string: String::from("") };
             }
             _ => {}
         }
     }
 
     pub fn progress(&mut self, new_progress: download::Progress) {
-        if let State::Downloading { progress } = &mut self.state {
+        if let State::Downloading { progress, input_string } = &mut self.state {
             match new_progress {
                 download::Progress::Started => {
                     *progress = 0.0;
@@ -140,11 +141,15 @@ impl Download {
                 download::Progress::Finished => {
                     self.state = State::Finished;
                 }
+                download::Progress::CalculationFinished(result_output) => {
+                    *input_string = result_output;
+                }
                 download::Progress::Errored => {
                     self.state = State::Errored;
                 }
             }
         }
+
     }
 
     pub fn subscription(&self) -> Subscription<Message> {
