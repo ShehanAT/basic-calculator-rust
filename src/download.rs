@@ -1,5 +1,6 @@
 use iced_native::subscription;
 
+use std::borrow::Borrow;
 use std::{hash::Hash, collections::HashMap};
 
 use std::io;
@@ -19,13 +20,14 @@ pub fn file<I: 'static + Hash + Copy + Send + Sync, T: ToString>(
 }
 
 pub fn download_start_calculating<I: 'static + Hash + Copy + Send + Sync, T: ToString>(
-    id: I,
+    id: I, 
     input_string: T,
 ) -> iced::Subscription<(I, Progress)> {
     // println!("Passing download_start_calculating(), id: {:?}, input_string: {:?}", id, input_string.to_string());
-    subscription::unfold(id, State::Ready(input_string.to_string()), move |state| {
+    subscription::unfold(id, CalculatorState::Ready(input_string.to_string()), move |state| {
         println!("Passing subscription::unfold");
-        calculate(id, State::Ready(input_string.to_string()));
+        calculate(id, state);
+        // download(id, state)
     })
 }
 
@@ -38,24 +40,60 @@ pub struct Download<I> {
 
 async fn calculate<I: Copy>(
     id: I,
-    state: State,
-) -> (Option<(I, Progress)>, State) {
+    state: CalculatorState,
+) -> (Option<(I, Progress)>, CalculatorState) {
+
     println!("Passing single_download.calculate()");
     match state {
-        State::Ready(input_string) => {
+        CalculatorState::Ready(input_string) => {
             
             let result_output = evaluate_expr(&input_string).await;
             // println!("{:?}", result_output.unwrap());
             // let response = reqwest::get("https://speed.hetzner.de/100MB.bin?").await;
 
             match result_output {
-                Ok(_) => (Some((id, Progress::CalculationFinished(result_output.unwrap().to_string()))), State::Finished),
-                Err(_) => (Some((id, Progress::CalculationFinished("Calculation Failed!".to_string()))), State::Finished),
+                Ok(result_output) => {
+                    (Some((id, Progress::CalculationFinished(String::from(result_output.to_string().as_str())))), CalculatorState::Done(String::from(result_output.to_string().as_str())))
+                    // CalculatorState::Done(String::from(result_output.to_string().as_str()))
+
+                },
+                Err(result_output) => {
+                    (Some((id, Progress::CalculationFinished(result_output))), CalculatorState::Done(String::from("Error!")))
+
+                    // CalculatorState::Done(String::from("Error"))
+                }
             }
 
-        }
-        State::Downloading { response, total, downloaded } => todo!(),
-        State::Finished => todo!(),
+        },
+        CalculatorState::Downloading { result } => {
+            let response = reqwest::get("https://file-examples.com/wp-content/uploads/2017/02/file-sample_1MB.doc").await;
+
+            match response {
+                Ok(response) => {
+                    if let Some(total) = response.content_length() {
+                        (
+                            Some((id, Progress::Started)),
+                            CalculatorState::Downloading { result: (0) }, 
+                            // Some((id, Progress::Finished)), State::Finished
+                            Some((id, Progress::CalculationFinished(result_output.unwrap().to_string()))), State::Finished
+                            // Some((id, Progress::CalculationFinished(result_output.unwrap_err())), State::Finished
+                        )
+                    } else {
+                        (Some((id, Progress::Errored)), State::Finished)
+                    }
+                }
+                Err(_) => (Some((id, Progress::Errored)), State::Finished),
+            }
+        },
+
+        CalculatorState::Done(output_string) => {
+            // CalculatorState::Done(output_string)
+            (Some((id, Progress::CalculationFinished(output_string))), CalculatorState::Finished)
+        },
+        CalculatorState::Finished => {
+            iced::futures::future::pending().await
+        },
+       
     }
 
 }
@@ -179,6 +217,16 @@ pub enum State {
         response: reqwest::Response,
         total: u64,
         downloaded: u64,
+        // result: f64,
+    },
+    Finished,
+}
+
+pub enum CalculatorState {
+    Ready(String),
+    Done(String),
+    Downloading {
+        result: f64,
         // result: f64,
     },
     Finished,
