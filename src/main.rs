@@ -1,327 +1,200 @@
-use iced::alignment;
 use iced::executor;
-use iced::theme::{self, Theme};
-use iced::time;
-use iced::widget::{button, column, container, row, text};
+use iced::widget::{button, column, container, progress_bar, text, Column};
 use iced::{
     Alignment, Application, Command, Element, Length, Settings, Subscription,
+    Theme,
 };
-use std::time::{Duration, Instant};
 
-
-use std::io;
-use std::io::prelude::*;
-use std::collections::HashMap;
-pub mod parser;
-
+mod download;
+mod parser;
 
 pub fn main() -> iced::Result {
-    Stopwatch::run(Settings::default())
+    Example::run(Settings::default())
 }
 
-// #[derive(Debug)]
-struct Stopwatch {
-    duration: Duration,
-    state: State,
-    // input_string: Cell<String>,
-    input_string: InputString,
-    // input_string: str,
-
+#[derive(Debug)]
+struct Example {
+    downloads: Vec<Download>,
+    last_id: usize,
 }
 
 #[derive(Debug, Clone)]
-struct CalculatorLogic {
-    input_string: InputString,
-}
-
-impl CalculatorLogic {
-
-    async fn evaluate(input: &str, env: &mut HashMap<String, f64>) -> Result<f64, String> {
-        let mut p = parser::Parser::new(input);
-        let ast = p.parse()?;
-        match ast.eval(env) {
-            Some(result) => Ok(result),
-            None => Err("No value for that expression!".to_string())
-        }
-    }
-
-    async fn evaluate_expr(input_string: &str) {
-        use std::f64;
-        let mut env = HashMap::new();
-        env.insert("wow".to_string(), 35.0f64);
-        env.insert("pi".to_string(), f64::consts::PI);
-    
-        let stdin = io::stdin();
-    
-        let mut input = input_string;
-    
-        // stdin.read_line(&mut print_str);
-    
-        // match stdin.read_line(&mut String::from(&mut *input)) {
-        //     // println!("Input: {}", print_str);
-        //     Ok(_) => {
-    
-                if input.len() == 0 {
-                    println!("");
-                    return;
-                }
-    
-                let expression_text = input.trim_right();
-    
-                let result = Self::evaluate(expression_text, &mut env);
-                match result.await {
-                    Ok(value) => {
-                        println!("=> {}", value);
-                    }
-                    Err(s) => {
-                        println!("Error: {}", s);
-                    }
-                }
-                io::stdout().flush().ok();
-        //     }
-        //     Err(_) => {
-        //         println!("");
-        //         return;
-        //     }
-        // }
-    }
-}
-
-#[derive(Debug, Clone)]
-struct InputString {
-    input_string: String,
-}
-
-// impl Copy for Cell<String> {}
-
-// #[derive(Debug, Clone)]
-enum State {
-    Idle,
-    Ticking { last_tick: Instant },
-    
-}
-
-#[derive(Debug, Clone)]
-enum Error {
-    APIError,
-    LanguageError,
-}
-
-#[derive(Debug, Clone)]
-enum Message {
-    Toggle,
-    Reset,
-    Tick(Instant),
+pub enum Message {
     Add,
-    Subtract,
-    Divide,
-    Multiply,
-    Number,
-    One,
-    Two,
-    Three,
-    Evaluate,
-    Done(Result<Status, Error>),
+    Download(usize),
+    DownloadProgressed((usize, download::Progress)),
 }
 
-#[derive(Debug, Clone)]
-enum Status {
-    Success,
-    Fail,
-}
-
-// impl FnOnce<((),)> for Status {
-//     type Output;
-
-//     extern "rust-call" fn call_once(self, args: ((),)) -> Self::Output where
-//     Self : Sized,
-// ;
-// }
-
-
-impl Application for Stopwatch {
+impl Application for Example {
     type Message = Message;
     type Theme = Theme;
     type Executor = executor::Default;
     type Flags = ();
 
-    fn new(_flags: ()) -> (Stopwatch, Command<Message>) {
+    fn new(_flags: ()) -> (Example, Command<Message>) {
         (
-            Stopwatch {
-                duration: Duration::default(),
-                state: State::Idle,
-                input_string: InputString { input_string: 
-                    // Cell::new("".to_string()) 
-                    String::from("".to_string())
-                },
-                // input_string: String::new().as_str(),
+            Example {
+                downloads: vec![Download::new(0)],
+                last_id: 0,
             },
-            Command::none()
+            Command::none(),
         )
-       
     }
 
     fn title(&self) -> String {
-        String::from("Stopwatch - Iced")
+        String::from("Download progress - Iced")
     }
 
     fn update(&mut self, message: Message) -> Command<Message> {
         match message {
-            Message::Toggle => match self.state {
-                State::Idle => {
-                    self.state = State::Ticking {
-                        last_tick: Instant::now(),
-                    };
-                }
-                State::Ticking { .. } => {
-                    self.state = State::Idle;
-                }
-            },
-            Message::Tick(now) => {
-                if let State::Ticking { last_tick } = &mut self.state {
-                    self.duration += now - *last_tick;
-                    *last_tick = now;
-                }
-            }
-            Message::Reset => {
-                self.duration = Duration::default();
-            }
-            Message::One => {
-                // *self.input_string.input_string.get_mut() += "1";
-                self.input_string.input_string += "1";
-                // self.input_string.input_string += "1";
-            }
-            Message::Two => {
-                // *self.input_string.input_string.get_mut() += "2";
-                self.input_string.input_string += "2";
-            }
-            Message::Three => {
-                // *self.input_string.input_string.get_mut() += "3";
-                self.input_string.input_string += "3";
-            }
             Message::Add => {
-                // *self.input_string.input_string.get_mut() += "+";
-                self.input_string.input_string += "+";
+                self.last_id += 1;
+
+                self.downloads.push(Download::new(self.last_id));
             }
-            Message::Subtract => {
-                // *self.input_string.input_string.get_mut() += "-";
-                self.input_string.input_string += "-";
+            Message::Download(index) => {
+                if let Some(download) = self.downloads.get_mut(index) {
+                    download.start();
+                }
             }
-            // Message::Done(Ok(_)) => {
-            //     Command::none();
-            // }
-            // Message::Done(Err(_error)) => {
-            //     Command::none();
-            // }
-            Message::Evaluate => async {
-                let result = CalculatorLogic::evaluate_expr(&self.input_string.input_string).await;
-                println!("{:?}", result);
-                // Command::perform(CalculatorLogic::evaluate_expr(&self.input_string.input_string), Message::Done);
-            },
-            _ => self.duration = Duration::default()
-        }
+            Message::DownloadProgressed((id, progress)) => {
+                if let Some(download) =
+                    self.downloads.iter_mut().find(|download| download.id == id)
+                {
+                    download.progress(progress);
+                }
+            }
+        };
 
         Command::none()
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        // let input_string = self.input_string.input_string
-        println!("Input String: {}", self.input_string.input_string);
-        match self.state {
-            State::Idle => Subscription::none(),
-            State::Ticking { .. } => {
-                time::every(Duration::from_millis(10)).map(Message::Tick)
-            }
-        }
+        Subscription::batch(self.downloads.iter().map(Download::subscription))
     }
 
-   
-
     fn view(&self) -> Element<Message> {
-        const MINUTE: u64 = 60;
-        const HOUR: u64 = 60 * MINUTE;
+        let downloads = Column::with_children(
+            self.downloads.iter().map(Download::view).collect(),
+        )
+        .push(
+            button("Add another download")
+                .on_press(Message::Add)
+                .padding(10),
+        )
+        .spacing(20)
+        .align_items(Alignment::End);
 
-        let seconds = self.duration.as_secs();
-
-        let duration = text(format!(
-            "{:0>2}:{:0>2}:{:0>2}.{:0>2}",
-            seconds / HOUR,
-            (seconds % HOUR) / MINUTE,
-            seconds % MINUTE,
-            self.duration.subsec_millis() / 10,
-        ))
-        .size(40);
-
-        let button = |label| {
-            button(
-                text(label).horizontal_alignment(alignment::Horizontal::Center),
-            )
-            .padding(10)
-            .width(Length::Units(80))
-        };
-
-        let toggle_button = {
-            let label = match self.state {
-                State::Idle => "Start",
-                State::Ticking { .. } => "Stop"
-            };
-
-            button(label).on_press(Message::Toggle)
-        };
-
-        let add_button = button("+")
-            .style(theme::Button::Primary)
-            .on_press(Message::Add);
-
-        let subtract_button = button("-")
-            .style(theme::Button::Primary)
-            .on_press(Message::Subtract);
-
-        let equal_button = button("=")
-            .style(theme::Button::Primary)
-            .on_press(Message::Evaluate);
-
-        let one_button = button("1")
-            .style(theme::Button::Secondary)
-            .on_press(Message::One);
-
-        let two_button = button("2")
-            .style(theme::Button::Secondary)
-            .on_press(Message::Two);
-        
-        let three_button = button("3")
-            .style(theme::Button::Secondary)
-            .on_press(Message::Three);
-
-        let reset_button = button("Reset")
-            .style(theme::Button::Destructive)
-            .on_press(Message::Reset);
-
-        let controls = row![toggle_button, reset_button].spacing(20);
-        let controls2 = row![add_button, subtract_button, equal_button].spacing(20);
-        let controls3 = row![one_button, two_button, three_button].spacing(20);
-
-        let content = column![duration, controls, controls2, controls3]
-            .align_items(Alignment::Center)
-            .spacing(20);
-
-        container(content)
+        container(downloads)
             .width(Length::Fill)
             .height(Length::Fill)
             .center_x()
             .center_y()
+            .padding(20)
             .into()
     }
-
-    fn theme(&self) -> Self::Theme {
-        Self::Theme::default()
-    }
-
-    fn style(&self) -> <Self::Theme as iced::application::StyleSheet>::Style {
-        <Self::Theme as iced::application::StyleSheet>::Style::default()
-    }
-
 }
 
+#[derive(Debug)]
+struct Download {
+    id: usize,
+    state: State,
+}
 
+#[derive(Debug)]
+enum State {
+    Idle,
+    Downloading { progress: f32 },
+    Finished,
+    Errored,
+}
 
+impl Download {
+    pub fn new(id: usize) -> Self {
+        Download {
+            id,
+            state: State::Idle,
+        }
+    }
+
+    pub fn start(&mut self) {
+        match self.state {
+            State::Idle { .. }
+            | State::Finished { .. }
+            | State::Errored { .. } => {
+                self.state = State::Downloading { progress: 0.0 };
+            }
+            _ => {}
+        }
+    }
+
+    pub fn progress(&mut self, new_progress: download::Progress) {
+        if let State::Downloading { progress } = &mut self.state {
+            match new_progress {
+                download::Progress::Started => {
+                    *progress = 0.0;
+                }
+                download::Progress::Advanced(percentage) => {
+                    *progress = percentage;
+                }
+                download::Progress::Finished => {
+                    self.state = State::Finished;
+                }
+                download::Progress::Errored => {
+                    self.state = State::Errored;
+                }
+            }
+        }
+    }
+
+    pub fn subscription(&self) -> Subscription<Message> {
+        match self.state {
+            State::Downloading { .. } => {
+                download::file(self.id, "https://speed.hetzner.de/100MB.bin?")
+                    .map(Message::DownloadProgressed)
+            }
+            _ => Subscription::none(),
+        }
+    }
+
+    pub fn view(&self) -> Element<Message> {
+        let current_progress = match &self.state {
+            State::Idle { .. } => 0.0,
+            State::Downloading { progress } => *progress,
+            State::Finished { .. } => 100.0,
+            State::Errored { .. } => 0.0,
+        };
+
+        let progress_bar = progress_bar(0.0..=100.0, current_progress);
+
+        let control: Element<_> = match &self.state {
+            State::Idle => button("Start the download!")
+                .on_press(Message::Download(self.id))
+                .into(),
+            State::Finished => {
+                column!["Download finished!", button("Start again")]
+                    .spacing(10)
+                    .align_items(Alignment::Center)
+                    .into()
+            }
+            State::Downloading { .. } => {
+                text(format!("Downloading... {:.2}%", current_progress)).into()
+            }
+            State::Errored => column![
+                "Something went wrong :(",
+                button("Try again").on_press(Message::Download(self.id)),
+            ]
+            .spacing(10)
+            .align_items(Alignment::Center)
+            .into(),
+        };
+
+        Column::new()
+            .spacing(10)
+            .padding(10)
+            .align_items(Alignment::Center)
+            .push(progress_bar)
+            .push(control)
+            .into()
+    }
+}
