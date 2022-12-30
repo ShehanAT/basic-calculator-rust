@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 use std::result;
-
+use iced_wgpu::Renderer;
 use download::CalculatorState;
 use iced::{executor, theme, subscription};
-use iced::widget::{button, column, container, progress_bar, text, Column};
+use iced::widget::{button, column, container, progress_bar, text, Column, Row};
 use iced::{
     Alignment, Application, Command, Element, Length, Settings, Subscription,
     Theme,
@@ -21,12 +21,19 @@ struct Example {
     downloads: Vec<Download>,
     single_download: Download,
     last_id: usize,
+    input_string: String,
+    output_string: String,
 }
 
 #[derive(Debug, Clone)]
 pub enum Message {
     StartCalculating,
     DoneCalculating(String),
+    Add,
+    Equals,
+    One,
+    Two,
+    Three,
 }
 
 impl Application for Example {
@@ -41,8 +48,10 @@ impl Application for Example {
                 downloads: vec![Download::new(0)],
                 last_id: 0,
                 single_download: Download::new(10),
+                input_string: "".to_string(),
+                output_string: "4 + 4".to_string(),
             },
-            Command::perform(Calculator::calculate("4 + 4".to_string()), Message::DoneCalculating),
+            Command::perform(Calculator::calculate("".to_string()), Message::DoneCalculating),
         )
     }
 
@@ -52,12 +61,35 @@ impl Application for Example {
 
     fn update(&mut self, message: Message) -> Command<Message> {
         match message {
+            Message::One => {
+                self.input_string += "1";
+                Command::none()
+            },
+            Message::Two => {
+                self.input_string += "2";
+                Command::none()
+            },
+            Message::Three => {
+                self.input_string += "3";
+                Command::none()
+            },
+            Message::Add => {
+                self.input_string += "+";
+                Command::none()
+            },
+            Message::Equals => {
+                self.input_string += "=";
+                let dup_str = self.input_string.clone();
+                println!("Input String: {}", self.input_string);
+                Command::perform(Calculator::calculate(dup_str), Message::DoneCalculating)
+            },
             Message::StartCalculating => {
                 println!("Message::StartCalculating");
                 Command::perform(Calculator::calculate("4 + 4".to_string()), Message::DoneCalculating)
             },
             Message::DoneCalculating(result) => {
                 println!("Message::DoneCalculating, Output: {}", result);
+                self.output_string = result;
                 Command::none()
             },
             _ => {
@@ -67,13 +99,47 @@ impl Application for Example {
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        // println!("Passing subscription()");
-        // println!("{:?}", self.single_download);
-        // Command::perform(Calculator::calculate("4 + 4".to_string()), Message::DoneCalculating);
         Subscription::batch(self.downloads.iter().map(Download::subscription))
     }
 
     fn view(&self) -> Element<Message> {
+
+        let num_col1: Row<Message, Renderer<Backend, ..>> = Row::new()
+            .width(Length::Fill)
+            .height(Length::Fill)
+            .align_items(Alignment::End)
+            .spacing(20)
+            .push(
+                button("1")
+                .style(theme::Button::Text)
+                .on_press(Message::One)
+            )
+            .push(
+                button("2")
+                .style(theme::Button::Text)
+                .on_press(Message::Two)
+            )
+            .push(
+                button("3")
+                .style(theme::Button::Text)
+                .on_press(Message::Three)
+            ).into();
+
+        let num_col2 = Row::new()
+        .width(Length::Units(500))
+        .spacing(20)
+        .push(
+            button("+")
+            .style(theme::Button::Text)
+            .on_press(Message::Add)
+        )
+        .push(
+            button("=")
+            .style(theme::Button::Text)
+            .on_press(Message::Equals)
+        );
+
+    
         let downloads = Column::with_children(
             self.downloads.iter().map(Download::view).collect(),
         )
@@ -81,6 +147,35 @@ impl Application for Example {
             button("Start Calculation!")
             .style(theme::Button::Primary)
             .on_press(Message::StartCalculating)
+            
+        )
+        .push(
+            text(format!("Output String: {}", self.output_string))
+        )
+        .push(
+            button("1")
+            .style(theme::Button::Text)
+            .on_press(Message::One)
+        )
+        .push(
+            button("2")
+            .style(theme::Button::Text)
+            .on_press(Message::Two)
+        )
+        .push(
+            button("3")
+            .style(theme::Button::Text)
+            .on_press(Message::Three)
+        )
+        .push(
+            button("+")
+            .style(theme::Button::Text)
+            .on_press(Message::Add)
+        )
+        .push(
+            button("=")
+            .style(theme::Button::Text)
+            .on_press(Message::Equals)
         )
         .spacing(20)
         .align_items(Alignment::End);
@@ -112,7 +207,7 @@ enum State {
     Finished,
     Errored,
     CalculatorEvaluating { done: bool },
-    CalculatorResult { input_string: String },
+    CalculatorResult { output_string: String },
 }
 
 impl Download {
@@ -134,26 +229,6 @@ impl Download {
         }
     }
 
-    // pub fn start_calculating(&mut self) {
-    //     match self.state {
-    //         State::Idle { .. }
-    //         | State::Finished { .. }
-    //         | State::Errored { .. } => {
-
-    //             Command::perform(Calculator::calculate("4 + 4".to_string()), Message::DoneCalculating);
-    //             self.state = State::CalculatorEvaluating { done: false };
-    //         }
-    //         _ => {}
-    //     }
-
-    //     // if let State::CalculatorEvaluating { done } = &mut self.state {
-    //     //     println!("State::CalculatorEvaluating");
-    //     //     download::download_start_calculating(10, "4 + 4")
-    //     //     .map(Message::DoneCalculating);
-         
-
-    //     // }
-    // }
 
     pub fn progress(&mut self, new_progress: download::Progress) {
         if let State::Downloading { progress } = &mut self.state {
@@ -177,18 +252,6 @@ impl Download {
 
     pub fn subscription(&self) -> Subscription<Message> {
         Subscription::none()
-        // match self.state {
-        //     State::Downloading { .. } => {
-        //         download::file(self.id, "https://speed.hetzner.de/100MB.bin?")
-        //             .map(Message::DownloadProgressed)
-        //     },
-        //     State::CalculatorEvaluating { .. } => {
-        //         todo!();
-        //         // download::download_start_calculating(0, "4 + 4")
-        //         //     .map(Message::DoneCalculating)
-        //     }
-        //     _ => Subscription::none(),
-        // }
     }
 
     pub fn view(&self) -> Element<Message> {
@@ -198,56 +261,16 @@ impl Download {
             State::Finished { .. } => 100.0,
             State::Errored { .. } => 0.0,
             State::CalculatorEvaluating { done } => todo!(),
-            State::CalculatorResult { input_string } => todo!(),
+            State::CalculatorResult { output_string } => todo!(),
         };
 
         let progress_bar = progress_bar(0.0..=100.0, current_progress);
-
-        // let calculator_start_btn = 
-
-        // let control2: Element<_> = match &self.state {
-        //     State::Idle => button("Start Calculation!")
-        //     .style(theme::Button::Primary)
-        //     .on_press(Message::StartCalculating)
-        //     .into(),
-        //     State::Downloading { progress } => todo!(),
-        //     State::Finished => todo!(),
-        //     State::Errored => todo!(),
-        //     State::CalculatorEvaluating { done } => todo!(),
-        //     State::CalculatorResult { input_string } => todo!(),
-
-        // };
-        // let control: Element<_> = match &self.state {
-        //     State::Idle => button("Start the download!")
-        //         .on_press(Message::StartCalculating)
-        //         .into(),
-        //     State::Finished => {
-        //         column!["Download finished!", button("Start again")]
-        //             .spacing(10)
-        //             .align_items(Alignment::Center)
-        //             .into()
-        //     }
-        //     State::Downloading { .. } => {
-        //         text(format!("Downloading... {:.2}%", current_progress)).into()
-        //     }
-        //     State::Errored => column![
-        //         "Something went wrong :(",
-        //         button("Try again").on_press(Message::Download(self.id)),
-        //     ]
-        //     .spacing(10)
-        //     .align_items(Alignment::Center)
-        //     .into(),
-        //     State::CalculatorEvaluating { done } => todo!(),
-        //     State::CalculatorResult { input_string } => todo!(),
-        // };
 
         Column::new()
             .spacing(10)
             .padding(10)
             .align_items(Alignment::Center)
             .push(progress_bar)
-            // .push(control)
-            // .push(control2)
             .into()
     }
 }
