@@ -51,23 +51,19 @@ impl Application for Example {
     }
 
     fn update(&mut self, message: Message) -> Command<Message> {
-        println!("Passing update(), message: {:?}", message);
         match message {
             Message::StartCalculating => {
-                
+                println!("Message::StartCalculating");
                 Command::perform(Calculator::calculate("4 + 4".to_string()), Message::DoneCalculating)
-            }
+            },
             Message::DoneCalculating(result) => {
                 println!("Message::DoneCalculating, Output: {}", result);
                 Command::none()
-                // println!("{:?}", progress);
             },
             _ => {
                 Command::none()
             }
-        };
-
-        Command::none()
+        }
     }
 
     fn subscription(&self) -> Subscription<Message> {
