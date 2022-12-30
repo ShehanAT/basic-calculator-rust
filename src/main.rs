@@ -1,9 +1,8 @@
 use std::collections::HashMap;
 use std::result;
-use iced_wgpu::Renderer;
 use download::CalculatorState;
 use iced::{executor, theme, subscription};
-use iced::widget::{button, column, container, progress_bar, text, Column, Row};
+use iced::widget::{button, column, container, progress_bar, text, Column, Row, row};
 use iced::{
     Alignment, Application, Command, Element, Length, Settings, Subscription,
     Theme,
@@ -104,40 +103,50 @@ impl Application for Example {
 
     fn view(&self) -> Element<Message> {
 
-        let num_col1: Row<Message, Renderer<Backend, ..>> = Row::new()
-            .width(Length::Fill)
-            .height(Length::Fill)
-            .align_items(Alignment::End)
-            .spacing(20)
-            .push(
-                button("1")
-                .style(theme::Button::Text)
-                .on_press(Message::One)
-            )
-            .push(
-                button("2")
-                .style(theme::Button::Text)
-                .on_press(Message::Two)
-            )
-            .push(
-                button("3")
-                .style(theme::Button::Text)
-                .on_press(Message::Three)
-            ).into();
+        // let num_col1: Row<Message, Renderer<Backend, ..>> = Row::new()
+        //     .width(Length::Fill)
+        //     .height(Length::Fill)
+        //     .align_items(Alignment::End)
+        //     .spacing(20)
+        //     .push(
+        //         button("1")
+        //         .style(theme::Button::Text)
+        //         .on_press(Message::One)
+        //     )
+        //     .push(
+        //         button("2")
+        //         .style(theme::Button::Text)
+        //         .on_press(Message::Two)
+        //     )
+        //     .push(
+        //         button("3")
+        //         .style(theme::Button::Text)
+        //         .on_press(Message::Three)
+        //     ).into();
+        
+        let output_text = text(format!("Output: {}", self.output_string));
+        let input_text = text(format!("Input: {}", self.input_string));
 
-        let num_col2 = Row::new()
-        .width(Length::Units(500))
-        .spacing(20)
-        .push(
+        let add_btn = 
             button("+")
             .style(theme::Button::Text)
-            .on_press(Message::Add)
-        )
-        .push(
-            button("=")
+            .on_press(Message::Add);
+        
+        let equals_btn = button("=")
             .style(theme::Button::Text)
-            .on_press(Message::Equals)
-        );
+            .on_press(Message::Equals);
+
+        let one_btn = button("1")
+            .style(theme::Button::Text)
+            .on_press(Message::One);
+
+        let two_btn = button("2")
+            .style(theme::Button::Text)
+            .on_press(Message::Two);
+
+        let three_btn = button("3")
+            .style(theme::Button::Text)
+            .on_press(Message::Three);
 
     
         let downloads = Column::with_children(
@@ -180,7 +189,16 @@ impl Application for Example {
         .spacing(20)
         .align_items(Alignment::End);
 
-        container(downloads)
+        // let controls = row![toggle_button, reset_button].spacing(20);
+        let first_row = row![input_text, output_text];
+        let second_row = row![add_btn, equals_btn].spacing(20);
+        let third_row = row![one_btn, two_btn, three_btn].spacing(20);
+        let content = column![first_row, second_row, third_row]
+            .align_items(Alignment::Center)
+            .spacing(20);
+
+        // container(downloads)
+        container(content)    
             .width(Length::Fill)
             .height(Length::Fill)
             .center_x()
