@@ -163,6 +163,16 @@ impl Parser {
                     arg: arg
                 })
             }
+            "tan" | "tangent" => {
+                Box::new( ast::Tan {
+                    arg: arg
+                })
+            }
+            "fact" => {
+                Box::new( ast::Factorial {
+                    arg: arg
+                })
+            } 
             "print" => {
                 Box::new( ast::Print {
                     arg: arg

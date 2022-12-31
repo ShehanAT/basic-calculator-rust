@@ -136,6 +136,40 @@ impl Node for Cos {
     }
 }
 
+pub struct Tan {
+    pub arg: Box<dyn Node>
+}
+
+impl Node for Tan {
+    fn eval(&self, env: &mut HashMap<String, f64>) -> Option<f64> {
+        match self.arg.eval(env) {
+            Some(x) => Some(x.tan()),
+            None => None
+        }
+    }
+}
+
+pub struct Factorial {
+    pub arg: Box<dyn Node>
+}
+
+impl Node for Factorial {
+    fn eval(&self, env: &mut HashMap<String, f64>) -> Option<f64> {
+        match self.arg.eval(env) {
+            Some(x) => Some(factorial(x)),
+            None => None
+        }
+    }
+}
+
+fn factorial(number: f64) -> f64 {
+    if number < 2.0 {
+        1.0
+    } else {
+        number * factorial(number - 1.0)
+    }
+}
+
 pub struct Sqrt {
     pub arg: Box<dyn Node>
 }

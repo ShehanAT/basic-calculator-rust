@@ -24,6 +24,9 @@ pub enum Message {
     StartCalculating,
     DoneCalculating(String),
     CE,
+    Sin,
+    Cos,
+    Tan,
     LeftParen,
     RightParen,
     Factorial,
@@ -191,15 +194,35 @@ impl Application for Example {
                 }
                 Command::none()
             },
-            Message::CE => {
-                self.display_text = "".to_string();
-                Command::none()
-            }
             Message::Divide => {
                 self.display_text += " / ";
                 if self.done_calculation {
                     self.done_calculation = false;
                 }
+                Command::none()
+            },
+            Message::CE => {
+                self.display_text = "".to_string();
+                Command::none()
+            },
+            Message::Sin => {
+                self.display_text = format!("sin({})", self.display_text);
+                Command::none()
+            },
+            Message::Cos => {
+                self.display_text = format!("cos({})", self.display_text);
+                Command::none()
+            },
+            Message::Tan => {
+                self.display_text = format!("tan({})", self.display_text);
+                Command::none()
+            },
+            Message::Negate => {
+                self.display_text = format!("(-{})", self.display_text);
+                Command::none()
+            },
+            Message::Factorial => {
+                self.display_text = format!("fact({})", self.display_text);
                 Command::none()
             },
             Message::Equals => {
@@ -227,6 +250,18 @@ impl Application for Example {
         let ce_btn = button("CE")
         .style(theme::Button::Text)
         .on_press(Message::CE);
+
+        let sin_btn = button("Sin")
+        .style(theme::Button::Text)
+        .on_press(Message::Sin);
+
+        let cos_btn = button("Cos")
+        .style(theme::Button::Text)
+        .on_press(Message::Cos);
+
+        let tan_btn = button("Tan")
+        .style(theme::Button::Text)
+        .on_press(Message::Tan);
 
         let left_paren_btn = 
             button("(")
@@ -317,7 +352,7 @@ impl Application for Example {
 
         let first_row = row![display_text];
         // let second_row = row![output_text];
-        let third_row = row![ce_btn];
+        let third_row = row![ce_btn, sin_btn, cos_btn, tan_btn];
         let fourth_row = row![left_paren_btn, right_paren_btn, factorial_btn, divide_btn].spacing(20);
         let fifth_row = row![seven_btn, eight_btn, nine_btn, multiply_btn].spacing(20);
         let sixth_row = row![four_btn, five_btn, six_btn, subtract_btn].spacing(20);
