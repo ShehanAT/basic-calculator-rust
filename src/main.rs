@@ -16,6 +16,7 @@ struct Example {
     input_string: String,
     output_string: String,
     display_text: String,
+    done_calculation: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -57,6 +58,7 @@ impl Application for Example {
                 input_string: "".to_string(),
                 output_string: "4 + 4".to_string(),
                 display_text: "".to_string(),
+                done_calculation: true,
             },
             Command::perform(Calculator::calculate("".to_string()), Message::DoneCalculating),
         )
@@ -69,80 +71,148 @@ impl Application for Example {
     fn update(&mut self, message: Message) -> Command<Message> {
         match message {
             Message::One => {
-                self.input_string += "1";
-                self.display_text += "1";
+                if self.done_calculation {
+                    self.display_text = "1".to_string();
+                    self.done_calculation = false;
+                } else {
+                    self.display_text += "1";
+                }
+                
                 Command::none()
             },
             Message::Two => {
-                self.input_string += "2";
+                if self.done_calculation {
+                    self.display_text = "2".to_string();
+                    self.done_calculation = false;
+                } else {
+                    self.display_text += "2";
+                }
                 Command::none()
             },
             Message::Three => {
-                self.input_string += "3";
+                if self.done_calculation {
+                    self.display_text = "3".to_string();
+                    self.done_calculation = false;
+                } else {
+                    self.display_text += "3";
+                }
                 Command::none()
             },
             Message::Four => {
-                self.input_string += "4";
+                if self.done_calculation {
+                    self.display_text = "4".to_string();
+                    self.done_calculation = false;
+                } else {
+                    self.display_text += "4";
+                }
                 Command::none()
             },
             Message::Five => {
-                self.input_string += "5";
+                if self.done_calculation {
+                    self.display_text = "5".to_string();
+                    self.done_calculation = false;
+                } else {
+                    self.display_text += "5";
+                }
                 Command::none()
             },
             Message::Six => {
-                self.input_string += "6";
+                if self.done_calculation {
+                    self.display_text = "6".to_string();
+                    self.done_calculation = false;
+                } else {
+                    self.display_text += "6";
+                }
                 Command::none()
             },
             Message::Seven => {
-                self.input_string += "7";
+                if self.done_calculation {
+                    self.display_text = "7".to_string();
+                    self.done_calculation = false;
+                } else {
+                    self.display_text += "7";
+                }
                 Command::none()
             },
             Message::Eight => {
-                self.input_string += "8";
+                if self.done_calculation {
+                    self.display_text = "8".to_string();
+                    self.done_calculation = false;
+                } else {
+                    self.display_text += "8";
+                }
                 Command::none()
             },
             Message::Nine => {
-                self.input_string += "9";
+                if self.done_calculation {
+                    self.display_text = "9".to_string();
+                    self.done_calculation = false;
+                } else {
+                    self.display_text += "9";
+                }
                 Command::none()
             },
             Message::Zero => { 
-                self.input_string += "0";
+                if self.done_calculation {
+                    self.display_text = "0".to_string();
+                    self.done_calculation = false;
+                } else {
+                    self.display_text += "0";
+                }
                 Command::none()
             },
             Message::Decimal => {
-                self.input_string += ".";
+                if self.done_calculation {
+                    self.display_text = ".".to_string();
+                    self.done_calculation = false;
+                } else {
+                    self.display_text += ".";
+                }
                 Command::none()
             },
             Message::Add => {
-                self.input_string += " + ";
+                self.display_text += " + ";
+                if self.done_calculation {
+                    self.done_calculation = false;
+                }
                 Command::none()
             },
             Message::Subtract => {
-                self.input_string += " - ";
+                self.display_text += " - ";
+                if self.done_calculation {
+                    self.done_calculation = false;
+                }
                 Command::none()
             },
             Message::Multiply => {
-                self.input_string += " * ";
+                self.display_text += " * ";
+                if self.done_calculation {
+                    self.done_calculation = false;
+                }
                 Command::none()
             },
+            Message::CE => {
+                self.display_text = "".to_string();
+                Command::none()
+            }
             Message::Divide => {
-                self.input_string += " / ";
+                self.display_text += " / ";
+                if self.done_calculation {
+                    self.done_calculation = false;
+                }
                 Command::none()
             },
             Message::Equals => {
-                self.input_string += " = ";
-                let dup_str = self.input_string.clone();
-                println!("Input String: {}", self.input_string);
-                self.input_string = "".to_string();
+                let dup_str = self.display_text.clone();
+                self.display_text = "".to_string();
                 Command::perform(Calculator::calculate(dup_str), Message::DoneCalculating)
             },
             Message::StartCalculating => {
-                println!("Message::StartCalculating");
                 Command::perform(Calculator::calculate("4 + 4".to_string()), Message::DoneCalculating)
             },
             Message::DoneCalculating(result) => {
-                println!("Message::DoneCalculating, Output: {}", result);
-                self.output_string = result;
+                self.display_text = result;
+                self.done_calculation = true;
                 Command::none()
             },
             _ => {
@@ -153,8 +223,6 @@ impl Application for Example {
 
     fn view(&self) -> Element<Message> {
         let display_text = text(format!("{}", self.display_text));
-        let output_text = text(format!("Output: {}", self.output_string));
-        let input_text = text(format!("Input: {}", self.input_string));
 
         let ce_btn = button("CE")
         .style(theme::Button::Text)
@@ -247,17 +315,16 @@ impl Application for Example {
             .style(theme::Button::Text)
             .on_press(Message::Decimal);
 
-        let first_row = row![input_text];
-        let second_row = row![output_text];
+        let first_row = row![display_text];
+        // let second_row = row![output_text];
         let third_row = row![ce_btn];
         let fourth_row = row![left_paren_btn, right_paren_btn, factorial_btn, divide_btn].spacing(20);
         let fifth_row = row![seven_btn, eight_btn, nine_btn, multiply_btn].spacing(20);
         let sixth_row = row![four_btn, five_btn, six_btn, subtract_btn].spacing(20);
         let seventh_row = row![one_btn, two_btn, three_btn, add_btn].spacing(20);
         let eighth_row = row![negate_btn, zero_btn, decimal_btn, equals_btn].spacing(20);
-        let ninth_row = row![display_text];
 
-        let content = column![first_row, second_row, third_row, fourth_row, fifth_row, sixth_row, seventh_row, eighth_row, ninth_row]
+        let content = column![first_row, third_row, fourth_row, fifth_row, sixth_row, seventh_row, eighth_row]
             .align_items(Alignment::Center)
             .spacing(20);
 
@@ -309,12 +376,7 @@ impl Calculator {
         env.insert("wow".to_string(), 35.0f64);
         env.insert("pi".to_string(), f64::consts::PI);
     
-     
-        print!(">> ");
-        
-    
         let mut input = input_string;
-    
     
         let expression_text = input.trim_right();
     
