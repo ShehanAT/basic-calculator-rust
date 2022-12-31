@@ -76,7 +76,7 @@ impl Parser {
             SYMBOL(val) => {
                 //only allow math functions for now, no variables
                 self.next_token()?;
-                match self.peek_token()? {
+                match self.peek_token()? {       
                     LPAREN => {
                         self.expect('(')?;
                         let e = self.expr(1)?;
@@ -175,6 +175,11 @@ impl Parser {
             } 
             "print" => {
                 Box::new( ast::Print {
+                    arg: arg
+                })
+            }
+            "-" => {
+                Box::new( ast::Negate {
                     arg: arg
                 })
             }

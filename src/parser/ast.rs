@@ -197,6 +197,21 @@ impl Node for Print {
     }
 }
 
+pub struct Negate {
+    pub arg: Box<dyn Node>
+}
+
+impl Node for Negate {
+    fn eval(&self, env: &mut HashMap<String, f64>) -> Option<f64> {
+        let res = self.arg.eval(env);
+        match res {
+            Some(x) => Some(-x),
+            None => None
+        };
+        res
+    }
+}
+
 pub struct Var {
     pub name: String
 }

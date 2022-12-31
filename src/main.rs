@@ -24,11 +24,11 @@ pub fn main() -> iced::Result {
         },
         ..Default::default()
     };
-    Example::run(settings)
+    CalculatorGUI::run(settings)
 }
 
 #[derive(Debug)]
-struct Example {
+struct CalculatorGUI {
     display_text: String,
     done_calculation: bool,
 }
@@ -63,15 +63,15 @@ pub enum Message {
     Decimal,
 }
 
-impl Application for Example {
+impl Application for CalculatorGUI {
     type Message = Message;
     type Theme = Theme;
     type Executor = executor::Default;
     type Flags = ();
 
-    fn new(_flags: ()) -> (Example, Command<Message>) {
+    fn new(_flags: ()) -> (CalculatorGUI, Command<Message>) {
         (
-            Example {
+            CalculatorGUI {
                 display_text: "".to_string(),
                 done_calculation: true,
             },
@@ -229,8 +229,26 @@ impl Application for Example {
                 self.display_text = format!("tan({})", self.display_text);
                 Command::none()
             },
+            Message::LeftParen => {
+                if self.done_calculation {
+                    self.display_text = "(".to_string();
+                    self.done_calculation = false;
+                } else {
+                    self.display_text += "(";
+                }
+                Command::none()
+            },
+            Message::RightParen => {
+                if self.done_calculation {
+                    self.display_text = ")".to_string();
+                    self.done_calculation = false;
+                } else {
+                    self.display_text += ")";
+                }
+                Command::none()
+            },
             Message::Negate => {
-                self.display_text = format!("(-{})", self.display_text);
+                self.display_text = format!("-({})", self.display_text);
                 Command::none()
             },
             Message::Factorial => {

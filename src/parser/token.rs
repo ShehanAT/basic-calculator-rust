@@ -5,6 +5,7 @@ use self::Token::*;
 pub enum Token {
     LPAREN,
     RPAREN,
+    NEGATE,
     ADD,
     SUB,
     MUL,
@@ -29,6 +30,7 @@ impl Token {
 
     pub fn to_char(&self) -> char {
         match *self {
+            NEGATE => '-',
             LPAREN => '(',
             RPAREN => ')',
             ADD => '+',

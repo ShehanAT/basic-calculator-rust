@@ -29,7 +29,9 @@ impl Lexer {
             return Ok(EOF);
         }
         self.consume_whitespace();
+        let next = self.src.chars().nth(self.pos + 1).unwrap();
         match self.curr {
+            
             '(' => {self.bump(); Ok(LPAREN)}
             ')' => {self.bump(); Ok(RPAREN)}
             c if c.is_digit(10) => {
@@ -41,6 +43,16 @@ impl Lexer {
                     end += 1;
                 }
                 Ok(NUMBER(self.src[start..end].parse::<f64>().unwrap()))
+            }
+            c if c.eq(&'-') => {
+                let start = self.pos;
+                let mut end = start + 1;
+                self.bump();
+                while (self.curr.is_digit(10) || self.curr == '.') && !self.eof{
+                    self.bump();
+                    end += 1;
+                }
+                Ok(SYMBOL(self.src[start..end].to_string()))
             }
             c if c.is_alphabetic() => {
                 let start = self.pos;
