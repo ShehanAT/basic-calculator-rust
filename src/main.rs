@@ -1,20 +1,34 @@
 use std::collections::HashMap;
+use iced::window::{Position, Icon};
 use iced::{executor, theme};
 use iced::widget::{button, column, container, text, row};
 use iced::{
-    Alignment, Application, Command, Element, Length, Settings, Theme,
+    Alignment, Application, Command, Element, Length, Settings, Theme, window
 };
 
 mod parser;
 
 pub fn main() -> iced::Result {
-    Example::run(Settings::default())
+    let settings = Settings {
+        window: window::Settings {
+            size: (200, 400),
+            resizable: true,
+            decorations: true,
+            position: Position::Default,
+            min_size: Some((300, 400)),
+            max_size: Some((300, 400)),
+            visible: true,
+            transparent: false,
+            always_on_top: true,
+            icon: Some(Icon::from_rgba(vec![0,0,0,0], 1, 1).unwrap()),
+        },
+        ..Default::default()
+    };
+    Example::run(settings)
 }
 
 #[derive(Debug)]
 struct Example {
-    input_string: String,
-    output_string: String,
     display_text: String,
     done_calculation: bool,
 }
@@ -58,8 +72,6 @@ impl Application for Example {
     fn new(_flags: ()) -> (Example, Command<Message>) {
         (
             Example {
-                input_string: "".to_string(),
-                output_string: "4 + 4".to_string(),
                 display_text: "".to_string(),
                 done_calculation: true,
             },
