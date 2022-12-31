@@ -28,11 +28,26 @@ struct Example {
 pub enum Message {
     StartCalculating,
     DoneCalculating(String),
+    LeftParen,
+    RightParen,
+    Factorial,
     Add,
+    Subtract,
+    Multiply,
+    Divide,
     Equals,
     One,
     Two,
     Three,
+    Four,
+    Five,
+    Six, 
+    Seven,
+    Eight,
+    Nine,
+    Zero,
+    Negate,
+    Decimal,
 }
 
 impl Application for Example {
@@ -72,14 +87,59 @@ impl Application for Example {
                 self.input_string += "3";
                 Command::none()
             },
+            Message::Four => {
+                self.input_string += "4";
+                Command::none()
+            },
+            Message::Five => {
+                self.input_string += "5";
+                Command::none()
+            },
+            Message::Six => {
+                self.input_string += "6";
+                Command::none()
+            },
+            Message::Seven => {
+                self.input_string += "7";
+                Command::none()
+            },
+            Message::Eight => {
+                self.input_string += "8";
+                Command::none()
+            },
+            Message::Nine => {
+                self.input_string += "9";
+                Command::none()
+            },
+            Message::Zero => { 
+                self.input_string += "0";
+                Command::none()
+            },
+            Message::Decimal => {
+                self.input_string += ".";
+                Command::none()
+            },
             Message::Add => {
-                self.input_string += "+";
+                self.input_string += " + ";
+                Command::none()
+            },
+            Message::Subtract => {
+                self.input_string += " - ";
+                Command::none()
+            },
+            Message::Multiply => {
+                self.input_string += " * ";
+                Command::none()
+            },
+            Message::Divide => {
+                self.input_string += " / ";
                 Command::none()
             },
             Message::Equals => {
-                self.input_string += "=";
+                self.input_string += " = ";
                 let dup_str = self.input_string.clone();
                 println!("Input String: {}", self.input_string);
+                self.input_string = "".to_string();
                 Command::perform(Calculator::calculate(dup_str), Message::DoneCalculating)
             },
             Message::StartCalculating => {
@@ -102,35 +162,44 @@ impl Application for Example {
     }
 
     fn view(&self) -> Element<Message> {
-
-        // let num_col1: Row<Message, Renderer<Backend, ..>> = Row::new()
-        //     .width(Length::Fill)
-        //     .height(Length::Fill)
-        //     .align_items(Alignment::End)
-        //     .spacing(20)
-        //     .push(
-        //         button("1")
-        //         .style(theme::Button::Text)
-        //         .on_press(Message::One)
-        //     )
-        //     .push(
-        //         button("2")
-        //         .style(theme::Button::Text)
-        //         .on_press(Message::Two)
-        //     )
-        //     .push(
-        //         button("3")
-        //         .style(theme::Button::Text)
-        //         .on_press(Message::Three)
-        //     ).into();
         
         let output_text = text(format!("Output: {}", self.output_string));
         let input_text = text(format!("Input: {}", self.input_string));
+
+        let left_paren_btn = 
+            button("(")
+            .style(theme::Button::Text)
+            .on_press(Message::LeftParen);
+
+        let right_paren_btn = 
+            button(")")
+            .style(theme::Button::Text)
+            .on_press(Message::RightParen);
+
+        let factorial_btn = 
+            button("n!")
+            .style(theme::Button::Text)
+            .on_press(Message::Factorial);
 
         let add_btn = 
             button("+")
             .style(theme::Button::Text)
             .on_press(Message::Add);
+
+        let subtract_btn = 
+            button("-")
+            .style(theme::Button::Text)
+            .on_press(Message::Subtract);
+
+        let multiply_btn = 
+            button("x")
+            .style(theme::Button::Text)
+            .on_press(Message::Multiply);
+        
+        let divide_btn = 
+            button("÷")
+            .style(theme::Button::Text)
+            .on_press(Message::Divide);
         
         let equals_btn = button("=")
             .style(theme::Button::Text)
@@ -148,56 +217,97 @@ impl Application for Example {
             .style(theme::Button::Text)
             .on_press(Message::Three);
 
+        let four_btn = button("4")
+            .style(theme::Button::Text)
+            .on_press(Message::Four);;
+
+        let five_btn = button("5")
+            .style(theme::Button::Text)
+            .on_press(Message::Five);
+
+        let six_btn = button("6")
+            .style(theme::Button::Text)
+            .on_press(Message::Six);
+        
+        let seven_btn = button("7")
+            .style(theme::Button::Text)
+            .on_press(Message::Seven);
+
+        let eight_btn = button("8")
+            .style(theme::Button::Text)
+            .on_press(Message::Eight);
+
+        let nine_btn = button("9")
+            .style(theme::Button::Text)
+            .on_press(Message::Nine);
     
-        let downloads = Column::with_children(
-            self.downloads.iter().map(Download::view).collect(),
-        )
-        .push(
-            button("Start Calculation!")
-            .style(theme::Button::Primary)
-            .on_press(Message::StartCalculating)
+        let zero_btn = button("0")
+            .style(theme::Button::Text)
+            .on_press(Message::Zero);
+
+        let negate_btn = button("+/-")
+            .style(theme::Button::Text)
+            .on_press(Message::Negate);
+
+        let decimal_btn = button(".")
+            .style(theme::Button::Text)
+            .on_press(Message::Decimal);
+
+    
+        // let downloads = Column::with_children(
+        //     self.downloads.iter().map(Download::view).collect(),
+        // )
+        // .push(
+        //     button("Start Calculation!")
+        //     .style(theme::Button::Primary)
+        //     .on_press(Message::StartCalculating)
             
-        )
-        .push(
-            text(format!("Output String: {}", self.output_string))
-        )
-        .push(
-            button("1")
-            .style(theme::Button::Text)
-            .on_press(Message::One)
-        )
-        .push(
-            button("2")
-            .style(theme::Button::Text)
-            .on_press(Message::Two)
-        )
-        .push(
-            button("3")
-            .style(theme::Button::Text)
-            .on_press(Message::Three)
-        )
-        .push(
-            button("+")
-            .style(theme::Button::Text)
-            .on_press(Message::Add)
-        )
-        .push(
-            button("=")
-            .style(theme::Button::Text)
-            .on_press(Message::Equals)
-        )
-        .spacing(20)
-        .align_items(Alignment::End);
+        // )
+        // .push(
+        //     text(format!("Output String: {}", self.output_string))
+        // )
+        // .push(
+        //     button("1")
+        //     .style(theme::Button::Text)
+        //     .on_press(Message::One)
+        // )
+        // .push(
+        //     button("2")
+        //     .style(theme::Button::Text)
+        //     .on_press(Message::Two)
+        // )
+        // .push(
+        //     button("3")
+        //     .style(theme::Button::Text)
+        //     .on_press(Message::Three)
+        // )
+        // .push(
+        //     button("+")
+        //     .style(theme::Button::Text)
+        //     .on_press(Message::Add)
+        // )
+        // .push(
+        //     button("=")
+        //     .style(theme::Button::Text)
+        //     .on_press(Message::Equals)
+        // )
+        // .spacing(20)
+        // .align_items(Alignment::End);
 
         // let controls = row![toggle_button, reset_button].spacing(20);
-        let first_row = row![input_text, output_text];
-        let second_row = row![add_btn, equals_btn].spacing(20);
-        let third_row = row![one_btn, two_btn, three_btn].spacing(20);
-        let content = column![first_row, second_row, third_row]
+
+        let first_row = row![input_text];
+        let second_row = row![output_text];
+        let third_row = row![left_paren_btn, right_paren_btn, factorial_btn, divide_btn].spacing(20);
+        let fourth_row = row![seven_btn, eight_btn, nine_btn, multiply_btn].spacing(20);
+        let fifth_row = row![four_btn, five_btn, six_btn, subtract_btn].spacing(20);
+        let sixth_row = row![one_btn, two_btn, three_btn, add_btn].spacing(20);
+        let seventh_row = row![negate_btn, zero_btn, decimal_btn, equals_btn].spacing(20);
+
+        let content = column![first_row, second_row, third_row, fourth_row, fifth_row, sixth_row, seventh_row]
             .align_items(Alignment::Center)
             .spacing(20);
 
-        // container(downloads)
         container(content)    
             .width(Length::Fill)
             .height(Length::Fill)
