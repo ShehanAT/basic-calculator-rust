@@ -1,14 +1,10 @@
 use std::collections::HashMap;
-use std::result;
-use download::CalculatorState;
-use iced::{executor, theme, subscription};
-use iced::widget::{button, column, container, progress_bar, text, Column, Row, row};
+use iced::{executor, theme};
+use iced::widget::{button, column, container, text, row};
 use iced::{
-    Alignment, Application, Command, Element, Length, Settings, Subscription,
-    Theme,
+    Alignment, Application, Command, Element, Length, Settings, Theme,
 };
 
-mod download;
 mod parser;
 
 pub fn main() -> iced::Result {
@@ -17,11 +13,9 @@ pub fn main() -> iced::Result {
 
 #[derive(Debug)]
 struct Example {
-    downloads: Vec<Download>,
-    single_download: Download,
-    last_id: usize,
     input_string: String,
     output_string: String,
+    display_text: String,
 }
 
 #[derive(Debug, Clone)]
@@ -60,11 +54,9 @@ impl Application for Example {
     fn new(_flags: ()) -> (Example, Command<Message>) {
         (
             Example {
-                downloads: vec![Download::new(0)],
-                last_id: 0,
-                single_download: Download::new(10),
                 input_string: "".to_string(),
                 output_string: "4 + 4".to_string(),
+                display_text: "".to_string(),
             },
             Command::perform(Calculator::calculate("".to_string()), Message::DoneCalculating),
         )
@@ -78,6 +70,7 @@ impl Application for Example {
         match message {
             Message::One => {
                 self.input_string += "1";
+                self.display_text += "1";
                 Command::none()
             },
             Message::Two => {
@@ -158,12 +151,8 @@ impl Application for Example {
         }
     }
 
-    fn subscription(&self) -> Subscription<Message> {
-        Subscription::batch(self.downloads.iter().map(Download::subscription))
-    }
-
     fn view(&self) -> Element<Message> {
-        
+        let display_text = text(format!("{}", self.display_text));
         let output_text = text(format!("Output: {}", self.output_string));
         let input_text = text(format!("Input: {}", self.input_string));
 
@@ -266,8 +255,9 @@ impl Application for Example {
         let sixth_row = row![four_btn, five_btn, six_btn, subtract_btn].spacing(20);
         let seventh_row = row![one_btn, two_btn, three_btn, add_btn].spacing(20);
         let eighth_row = row![negate_btn, zero_btn, decimal_btn, equals_btn].spacing(20);
+        let ninth_row = row![display_text];
 
-        let content = column![first_row, second_row, third_row, fourth_row, fifth_row, sixth_row, seventh_row, eighth_row]
+        let content = column![first_row, second_row, third_row, fourth_row, fifth_row, sixth_row, seventh_row, eighth_row, ninth_row]
             .align_items(Alignment::Center)
             .spacing(20);
 
@@ -285,88 +275,6 @@ impl Application for Example {
     }
 }
 
-#[derive(Debug)]
-struct Download {
-    id: usize,
-    state: State,
-}
-
-#[derive(Debug)]
-enum State {
-    Idle,
-    Downloading { progress: f32 },
-    Finished,
-    Errored,
-    CalculatorEvaluating { done: bool },
-    CalculatorResult { output_string: String },
-}
-
-impl Download {
-    pub fn new(id: usize) -> Self {
-        Download {
-            id,
-            state: State::Idle,
-        }
-    }
-
-    pub fn start(&mut self) {
-        match self.state { // This is match statement that sets the state from Idle, Finishing or Errored to Downloading 
-            State::Idle { .. }
-            | State::Finished { .. }
-            | State::Errored { .. } => {
-                self.state = State::Downloading { progress: 0.0 };
-            }
-            _ => {}
-        }
-    }
-
-
-    pub fn progress(&mut self, new_progress: download::Progress) {
-        if let State::Downloading { progress } = &mut self.state {
-            match new_progress {
-                download::Progress::Started => {
-                    *progress = 0.0;
-                }
-                download::Progress::Advanced(percentage) => {
-                    *progress = percentage;
-                }
-                download::Progress::Finished => {
-                    self.state = State::Finished;
-                }
-                download::Progress::Errored => {
-                    self.state = State::Errored;
-                }
-                download::Progress::CalculationFinished(_) => todo!(),
-            }
-        }
-    }
-
-    pub fn subscription(&self) -> Subscription<Message> {
-        Subscription::none()
-    }
-
-    pub fn view(&self) -> Element<Message> {
-        let current_progress = match &self.state {
-            State::Idle { .. } => 0.0,
-            State::Downloading { progress } => *progress,
-            State::Finished { .. } => 100.0,
-            State::Errored { .. } => 0.0,
-            State::CalculatorEvaluating { done } => todo!(),
-            State::CalculatorResult { output_string } => todo!(),
-        };
-
-        let progress_bar = progress_bar(0.0..=100.0, current_progress);
-
-        Column::new()
-            .spacing(10)
-            .padding(10)
-            .align_items(Alignment::Center)
-            .push(progress_bar)
-            .into()
-    }
-}
-
-
 pub struct Calculator {
     pub input_string: String,
     pub output_string: String,
@@ -379,10 +287,6 @@ impl Calculator {
     pub async fn calculate(
         input_string: String,
     ) -> String {
-
-        println!("Passing single_download.calculate()");
-
-                
         let result_output = Self::evaluate_expr(&input_string).await;
         match result_output {
             Ok(result) => result.to_string(),
