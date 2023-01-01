@@ -29,28 +29,10 @@ impl Lexer {
             return Ok(EOF);
         }
         self.consume_whitespace();
-        let next = self.src.chars().nth(self.pos + 1).unwrap_or('e');
         match self.curr {
             
             '(' => {self.bump(); Ok(LPAREN)}
             ')' => {self.bump(); Ok(RPAREN)}
-            // c if c.eq(&'-') && !next.eq(&'e')=> {
-            //     let minus_pos_start = self.pos;
-            //     let minus_pos_end = self.pos + 1;
-            //     self.bump();
-            //     self.bump();
-            //     let start = self.pos;
-            //     // let mut end = start + 1;
-            //     let mut end = start;
-            //     while (self.curr.is_digit(10) || self.curr == '.') && !self.eof{
-            //         self.bump();
-            //         end += 1;
-            //     }
-            //     // self.src = format!("{}{}", "-", self.src);
-            //     // println!("self.src: {}", self.src);
-            //     println!("negate string: {}", format!("{}{}", "-", self.src[start..end].to_string()));
-            //     Ok(NUMBER(format!("{}{}", "-", self.src[start..end].to_string()).parse::<f64>().unwrap()))
-            // }
             c if c.is_digit(10) => {
                 let start = self.pos;
                 let mut end = start + 1;
@@ -59,7 +41,6 @@ impl Lexer {
                     self.bump();
                     end += 1;
                 }
-                println!("NUMBER: {}", self.src[start..end].to_string());
                 Ok(NUMBER(self.src[start..end].parse::<f64>().unwrap()))
             }
        
@@ -71,7 +52,6 @@ impl Lexer {
                     self.bump();
                     end += 1;
                 }
-                println!("SYMBOL: {}", self.src[start..end].to_string());
                 Ok(SYMBOL(self.src[start..end].to_string()))
             }
             '+' => {self.bump(); Ok(ADD)}

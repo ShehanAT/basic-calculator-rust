@@ -32,15 +32,12 @@ impl Parser {
         
         loop {
             let curr = self.peek_token()?;
-            println!("peek_token: {:?}", self.peek_token());
-            //println!("{:?}", curr);
             if token::is_eof(&curr) {
                 //println!("breaking out of expr loop");
                 break;
             }
             // if lhs.as_ref().eval(env)
             let info_tuple = curr.info();
-            println!("info_tuple: {:?}", info_tuple);
             if info_tuple.is_none() {
                 break;
             }
@@ -115,11 +112,6 @@ impl Parser {
                             }
                             _ => Err(format!("unrecognized atom: {:?}", a))
                         }
-                        // Err(format!("unrecognized atom: {:?}", a))
-                        // println!("self.lexer.curr: {:?}, self.current.to_char(): {:?}", self.lexer.curr, self.current.to_char());
-                        // self.next_token()?;
-                        // println!("self.lexer.curr: {:?}, self.current.to_char(): {:?}", self.lexer.curr, self.current.to_char());
-                        // Err(format!("unrecognized atom: {:?}", a))
                     },
                     _ => Err(format!("unrecognized atom: {:?}", a))
                 }

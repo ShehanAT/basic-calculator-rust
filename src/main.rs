@@ -38,6 +38,7 @@ pub enum Message {
     StartCalculating,
     DoneCalculating(String),
     CE,
+    Del,
     Sin,
     Cos,
     Tan,
@@ -217,6 +218,12 @@ impl Application for CalculatorGUI {
                 self.display_text = "".to_string();
                 Command::none()
             },
+            Message::Del => {
+                let mut temp_display_text = self.display_text.to_string();
+                temp_display_text.pop();
+                self.display_text = temp_display_text;
+                Command::none()
+            }
             Message::Sin => {
                 self.display_text = format!("sin({})", self.display_text);
                 Command::none()
@@ -248,7 +255,7 @@ impl Application for CalculatorGUI {
                 Command::none()
             },
             Message::Negate => {
-                self.display_text = format!("-({})", self.display_text);
+                self.display_text = format!("(-{})", self.display_text);
                 Command::none()
             },
             Message::Factorial => {
@@ -280,6 +287,10 @@ impl Application for CalculatorGUI {
         let ce_btn = button("CE")
         .style(theme::Button::Text)
         .on_press(Message::CE);
+
+        let del_btn = button("DEL")
+        .style(theme::Button::Text)
+        .on_press(Message::Del);
 
         let sin_btn = button("Sin")
         .style(theme::Button::Text)
@@ -382,7 +393,7 @@ impl Application for CalculatorGUI {
 
         let first_row = row![display_text];
         // let second_row = row![output_text];
-        let third_row = row![ce_btn, sin_btn, cos_btn, tan_btn];
+        let third_row = row![ce_btn, sin_btn, cos_btn, tan_btn, del_btn];
         let fourth_row = row![left_paren_btn, right_paren_btn, factorial_btn, divide_btn].spacing(20);
         let fifth_row = row![seven_btn, eight_btn, nine_btn, multiply_btn].spacing(20);
         let sixth_row = row![four_btn, five_btn, six_btn, subtract_btn].spacing(20);
