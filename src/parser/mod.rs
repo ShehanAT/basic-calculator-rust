@@ -29,14 +29,18 @@ impl Parser {
     pub fn expr(&mut self, prec: usize) -> Result<Box<dyn ast::Node>, String> {
         let mut lhs = self.atom()?;
         let mut rhs;
+        
         loop {
             let curr = self.peek_token()?;
+            println!("peek_token: {:?}", self.peek_token());
             //println!("{:?}", curr);
             if token::is_eof(&curr) {
                 //println!("breaking out of expr loop");
                 break;
             }
+            // if lhs.as_ref().eval(env)
             let info_tuple = curr.info();
+            println!("info_tuple: {:?}", info_tuple);
             if info_tuple.is_none() {
                 break;
             }
@@ -60,7 +64,6 @@ impl Parser {
     }
 
     pub fn atom(&mut self) -> Result<Box<dyn ast::Node>, String> {
-
         match self.peek_token()? {
             EOF => { Ok(Box::new( ast::Num {num: 0f64})) }
             LPAREN => {
@@ -102,7 +105,24 @@ impl Parser {
                 }
             }
             a => {
-                Err(format!("unrecognized atom: {:?}", a))
+                match a {
+                    SUB => {
+                        self.next_token()?;
+                        match self.peek_token()? {
+                            NUMBER(val) => {
+                                self.next_token()?;
+                                Ok(Box::new( ast::Num { num: -val }))
+                            }
+                            _ => Err(format!("unrecognized atom: {:?}", a))
+                        }
+                        // Err(format!("unrecognized atom: {:?}", a))
+                        // println!("self.lexer.curr: {:?}, self.current.to_char(): {:?}", self.lexer.curr, self.current.to_char());
+                        // self.next_token()?;
+                        // println!("self.lexer.curr: {:?}, self.current.to_char(): {:?}", self.lexer.curr, self.current.to_char());
+                        // Err(format!("unrecognized atom: {:?}", a))
+                    },
+                    _ => Err(format!("unrecognized atom: {:?}", a))
+                }
             }
         }
     }
