@@ -146,6 +146,12 @@ impl Parser {
                     right: rhs
                 })
             }
+            MOD => {
+                Box::new( ast::Mod {
+                    left: lhs,
+                    right: rhs
+                })
+            }
             CARET => {
                 Box::new( ast::Pow {
                     base: lhs,

@@ -64,7 +64,7 @@ impl Node for Mul {
         match self.left.eval(env) {
             Some(l) => {
                 match self.right.eval(env) {
-                    Some(r) => Some(l*r),
+                    Some(r) => Some(l * r),
                     None => None
                 }
             }
@@ -83,7 +83,26 @@ impl Node for Div {
         match self.left.eval(env) {
             Some(l) => {
                 match self.right.eval(env) {
-                    Some(r) => Some(l/r),
+                    Some(r) => Some(l / r),
+                    None => None
+                }
+            }
+            None => None
+        }
+    }
+}
+
+pub struct Mod {
+    pub left: Box<dyn Node>,
+    pub right: Box<dyn Node>,
+}
+
+impl Node for Mod {
+    fn eval(&self, env: &mut HashMap<String, f64>) -> Option<f64> {
+        match self.left.eval(env) {
+            Some(l) => {
+                match self.right.eval(env) {
+                    Some(r) => Some(l % r),
                     None => None
                 }
             }

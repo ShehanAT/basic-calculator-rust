@@ -60,6 +60,7 @@ impl Lexer {
             '/' => {self.bump(); Ok(DIV)}
             '^' => {self.bump(); Ok(CARET)}
             '=' => {self.bump(); Ok(EQUALS)}
+            '%' => {self.bump(); Ok(MOD)}
             c => { Err(format!("unexpected token {} at position {}", c, self.pos)) }
         }
     }

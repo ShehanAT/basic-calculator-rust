@@ -5,11 +5,11 @@ use self::Token::*;
 pub enum Token {
     LPAREN,
     RPAREN,
-    NEGATE,
     ADD,
     SUB,
     MUL,
     DIV,
+    MOD,
     CARET,
     EQUALS,
     NUMBER(f64),
@@ -22,7 +22,7 @@ impl Token {
     pub fn info(&self) -> Option<(usize, usize)> {
         match *self {
             ADD | SUB => Some((10, 0)),
-            MUL | DIV => Some((20, 0)),
+            MUL | DIV | MOD => Some((20, 0)),
             CARET => Some((30, 1)),
             _ => { None}
         }
@@ -30,7 +30,6 @@ impl Token {
 
     pub fn to_char(&self) -> char {
         match *self {
-            NEGATE => '-',
             LPAREN => '(',
             RPAREN => ')',
             ADD => '+',
@@ -38,6 +37,7 @@ impl Token {
             MUL => '*',
             DIV => '/',
             CARET => '^',
+            MOD => '%',
             EQUALS => '=',
             EOF => 'E',
             NUMBER(_) => 'N',
