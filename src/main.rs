@@ -1,10 +1,14 @@
 use std::collections::HashMap;
 use iced::window::{Position, Icon};
-use iced::{executor, theme};
+use iced::{executor, theme, Point, Size};
 use iced::widget::{button, column, container, text, row};
 use iced::{
     Alignment, Application, Command, Element, Length, Settings, Theme, window
+}; 
+use iced_graphics::widget::canvas::{
+    Canvas, Cursor, Frame, Geometry, Path, Stroke,
 };
+
 
 mod parser;
 
@@ -415,7 +419,22 @@ impl Application for CalculatorGUI {
             .style(theme::Button::Text)
             .on_press(Message::Decimal);
 
-        let first_row = row![display_text].spacing(20).padding(10);
+        let display_frame = Frame::new(Size { width: 500.0, height: 500.0 });
+        display_frame.stroke(
+            &Path::rectangle(Point::ORIGIN, display_frame.size()),
+            Stroke::default().with_width(2.0)
+        );
+        display_frame.fill_text(display_text.into());
+        // display_frame
+        //  {
+        //         Curve::draw_all(self.curves, frame);
+
+        //         frame.stroke(
+        //             &Path::rectangle(Point::ORIGIN, frame.size()),
+        //             Stroke::default().with_width(2.0),
+        // );
+        // };
+        let first_row = row![display_frame].spacing(20).padding(10);
         // let second_row = row![output_text];
         // let third_row = row![].spacing(20);
         let fourth_row = row![sin_btn, cos_btn, tan_btn, del_btn, ce_btn].spacing(5);
