@@ -16,7 +16,7 @@ pub fn main() -> iced::Result {
             decorations: true,
             position: Position::Default,
             min_size: Some((300, 400)),
-            max_size: Some((300, 400)),
+            max_size: Some((200, 400)),
             visible: true,
             transparent: false,
             always_on_top: true,
@@ -415,16 +415,17 @@ impl Application for CalculatorGUI {
             .style(theme::Button::Text)
             .on_press(Message::Decimal);
 
-        let first_row = row![display_text];
+        let first_row = row![display_text].spacing(20).padding(10);
         // let second_row = row![output_text];
-        let third_row = row![ce_btn, sin_btn, cos_btn, tan_btn, del_btn];
-        let fourth_row = row![left_paren_btn, right_paren_btn, factorial_btn, divide_btn, mod_btn].spacing(20);
-        let fifth_row = row![seven_btn, eight_btn, nine_btn, multiply_btn, caret_btn].spacing(20);
-        let sixth_row = row![four_btn, five_btn, six_btn, subtract_btn].spacing(20);
-        let seventh_row = row![one_btn, two_btn, three_btn, add_btn].spacing(20);
-        let eighth_row = row![negate_btn, zero_btn, decimal_btn, equals_btn].spacing(20);
+        // let third_row = row![].spacing(20);
+        let fourth_row = row![sin_btn, cos_btn, tan_btn, del_btn, ce_btn].spacing(5);
+        let fifth_row = row![factorial_btn, mod_btn, negate_btn, caret_btn, left_paren_btn, right_paren_btn].spacing(13);
+        let sixth_row = row![seven_btn, eight_btn, nine_btn, divide_btn].spacing(20);
+        let seventh_row = row![four_btn, five_btn, six_btn, multiply_btn].spacing(20);
+        let eighth_row = row![one_btn, two_btn, three_btn, subtract_btn].spacing(20);
+        let ninth_row = row![equals_btn, zero_btn, decimal_btn, add_btn].spacing(20);
 
-        let content = column![first_row, third_row, fourth_row, fifth_row, sixth_row, seventh_row, eighth_row]
+        let content = column![first_row, fourth_row, fifth_row, sixth_row, seventh_row, eighth_row, ninth_row]
             .align_items(Alignment::Center)
             .spacing(20);
 
