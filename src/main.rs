@@ -1,13 +1,16 @@
 use std::collections::HashMap;
+use iced::alignment::Horizontal;
+use iced::widget::canvas::Style;
 use iced::window::{Position, Icon};
-use iced::{executor, theme, Point, Size};
-use iced::widget::{button, column, container, text, row};
+use iced::{executor, theme, Point, Size, Color, alignment};
+use iced::widget::{button, column, container, text, row, horizontal_space};
 use iced::{
     Alignment, Application, Command, Element, Length, Settings, Theme, window
 }; 
 use iced_graphics::widget::canvas::{
     Canvas, Cursor, Frame, Geometry, Path, Stroke,
 };
+use iced_native::widget::text_input;
 
 
 mod parser;
@@ -15,12 +18,12 @@ mod parser;
 pub fn main() -> iced::Result {
     let settings = Settings {
         window: window::Settings {
-            size: (200, 400),
+            size: (300, 500),
             resizable: true,
             decorations: true,
             position: Position::Default,
-            min_size: Some((300, 400)),
-            max_size: Some((200, 400)),
+            min_size: Some((300, 500)),
+            max_size: Some((300, 500)),
             visible: true,
             transparent: false,
             always_on_top: true,
@@ -68,6 +71,7 @@ pub enum Message {
     Zero,
     Negate,
     Decimal,
+    Typing,
 }
 
 impl Application for CalculatorGUI {
@@ -302,12 +306,23 @@ impl Application for CalculatorGUI {
     }
 
     fn view(&self) -> Element<Message> {
-        let display_text = text(format!("{}", self.display_text));
+        let title = text("Calculator")
+        .width(Length::Fill)
+        .size(20)
+        .style(Color::from([0.5, 0.5, 0.5]))
+        .horizontal_alignment(alignment::Horizontal::Center);
+        
+        let display_text = text(format!("{}", self.display_text)).width(Length::Fill);
+        // let display_text = text_input("", format!("{}", self.display_text).as_str(), Message::Add).width(Length::Fill);
+        // let horizontal_1 = horizontal_space(Length::Fill);
+        // let display_text_btn = button(self.display_text.as_str())
+        // .style(theme::Button::Text)
+        // .on_press(Message::Typing);
 
         let ce_btn = button("CE")
         .style(theme::Button::Text)
         .on_press(Message::CE);
-
+        // ce_btn.style(Color::from_rgb8(0x88, 0x88, 0x88))
         let del_btn = button("DEL")
         .style(theme::Button::Text)
         .on_press(Message::Del);
@@ -419,12 +434,13 @@ impl Application for CalculatorGUI {
             .style(theme::Button::Text)
             .on_press(Message::Decimal);
 
-        let display_frame = Frame::new(Size { width: 500.0, height: 500.0 });
-        display_frame.stroke(
-            &Path::rectangle(Point::ORIGIN, display_frame.size()),
-            Stroke::default().with_width(2.0)
-        );
-        display_frame.fill_text(display_text.into());
+        // let display_frame = Frame::new(Size { width: 500.0, height: 500.0 });
+        // display_frame.stroke(
+        //     &Path::rectangle(Point::ORIGIN, display_frame.size()),
+        //     Stroke::default().with_width(2.0)
+        // );
+        // display_frame.fill_text(display_text.into()).into();
+        // display_frame.
         // display_frame
         //  {
         //         Curve::draw_all(self.curves, frame);
@@ -434,7 +450,10 @@ impl Application for CalculatorGUI {
         //             Stroke::default().with_width(2.0),
         // );
         // };
-        let first_row = row![display_frame].spacing(20).padding(10);
+
+            
+        let first_row = row![title].spacing(20).padding(10).align_items(Alignment::Start);
+        let second_row = row![display_text].padding(32).align_items(Alignment::Start);
         // let second_row = row![output_text];
         // let third_row = row![].spacing(20);
         let fourth_row = row![sin_btn, cos_btn, tan_btn, del_btn, ce_btn].spacing(5);
@@ -444,7 +463,7 @@ impl Application for CalculatorGUI {
         let eighth_row = row![one_btn, two_btn, three_btn, subtract_btn].spacing(20);
         let ninth_row = row![equals_btn, zero_btn, decimal_btn, add_btn].spacing(20);
 
-        let content = column![first_row, fourth_row, fifth_row, sixth_row, seventh_row, eighth_row, ninth_row]
+        let content = column![first_row, second_row, fourth_row, fifth_row, sixth_row, seventh_row, eighth_row, ninth_row]
             .align_items(Alignment::Center)
             .spacing(20);
 
@@ -458,7 +477,7 @@ impl Application for CalculatorGUI {
     }
 
     fn theme(&self) -> Self::Theme {
-        Self::Theme::default()
+        Self::Theme::Dark
     }
 }
 
