@@ -39,6 +39,7 @@ pub enum Message {
     DoneCalculating(String),
     CE,
     Del,
+    Caret,
     Mod,
     Sin,
     Cos,
@@ -232,6 +233,13 @@ impl Application for CalculatorGUI {
                 self.display_text = temp_display_text;
                 Command::none()
             },
+            Message::Caret => {
+                self.display_text += " ^ ";
+                if self.done_calculation {
+                    self.done_calculation = false;
+                }
+                Command::none()
+            },
             Message::Sin => {
                 self.display_text = format!("sin({})", self.display_text);
                 Command::none()
@@ -299,6 +307,10 @@ impl Application for CalculatorGUI {
         let del_btn = button("DEL")
         .style(theme::Button::Text)
         .on_press(Message::Del);
+
+        let caret_btn = button("^")
+        .style(theme::Button::Text)
+        .on_press(Message::Caret);
 
         let mod_btn = button("%")
         .style(theme::Button::Text)
@@ -407,7 +419,7 @@ impl Application for CalculatorGUI {
         // let second_row = row![output_text];
         let third_row = row![ce_btn, sin_btn, cos_btn, tan_btn, del_btn];
         let fourth_row = row![left_paren_btn, right_paren_btn, factorial_btn, divide_btn, mod_btn].spacing(20);
-        let fifth_row = row![seven_btn, eight_btn, nine_btn, multiply_btn].spacing(20);
+        let fifth_row = row![seven_btn, eight_btn, nine_btn, multiply_btn, caret_btn].spacing(20);
         let sixth_row = row![four_btn, five_btn, six_btn, subtract_btn].spacing(20);
         let seventh_row = row![one_btn, two_btn, three_btn, add_btn].spacing(20);
         let eighth_row = row![negate_btn, zero_btn, decimal_btn, equals_btn].spacing(20);
