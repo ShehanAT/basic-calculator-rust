@@ -1,13 +1,16 @@
 use std::collections::HashMap;
+
 use iced::window::{Position, Icon};
 use iced::{executor, theme, Point, Size, Color, alignment, Background};
 use iced::widget::{button, column, container, text, row, horizontal_space};
 use iced::{
     Alignment, Application, Command, Element, Length, Settings, Theme, window
 }; 
+use iced_graphics::renderer::Style;
 use iced_graphics::widget::canvas::{
     Canvas, Cursor, Frame, Geometry, Path, Stroke,
 };
+
 
 mod parser;
 
@@ -463,10 +466,10 @@ impl Application for CalculatorGUI {
             .align_items(Alignment::Center)
             .spacing(20);
         
-        let container_1 = container(second_row)
-            .padding(20)
-            .style(container::Appearance { border_width: 20.0, border_radius: 2.0, ..Default::default() })
-            .into();
+        // let container_1 = container(second_row)
+        //     .padding(20)
+            
+        //     .into();
 
         container(content)    
             .width(Length::Fill)
@@ -474,7 +477,12 @@ impl Application for CalculatorGUI {
             .center_x()
             .center_y()
             .padding(20)
-            
+            // .style(
+            //     container::Appearance {
+            //         border_width: 2.0,
+            //         ..Default::default()
+            //     }
+            // )
             .into()
     }
 
