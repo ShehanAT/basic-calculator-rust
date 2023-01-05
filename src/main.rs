@@ -1,15 +1,13 @@
 use std::collections::HashMap;
 
 use iced::window::{Position, Icon};
-use iced::{executor, theme, Point, Size, Color, alignment, Background};
-use iced::widget::{button, column, container, text, row, horizontal_space};
+use iced::{executor, alignment};
+use iced::widget::{button, column, container, text, row};
 use iced::{
-    Alignment, Application, Command, Element, Length, Settings, Theme, window
+    Alignment, Application, Command, Length, Settings, window
 }; 
-use iced_graphics::renderer::Style;
-use iced_graphics::widget::canvas::{
-    Canvas, Cursor, Frame, Geometry, Path, Stroke,
-};
+use self::theme::Theme;
+use self::widget::Element;
 
 
 mod parser;
@@ -308,10 +306,10 @@ impl Application for CalculatorGUI {
         let title = text("Calculator")
         .width(Length::Fill)
         .size(20)
-        .style(Color::from([0.5, 0.5, 0.5]))
+        // .style(Color::from([0.5, 0.5, 0.5]))
         .horizontal_alignment(alignment::Horizontal::Center);
         
-        let display_text = text(format!("{}", self.display_text)).width(Length::Fill);
+        let display_text = button(text(format!("{}", self.display_text))).style(theme::Button::Primary).width(Length::Fill);
         // let display_text = text_input("", format!("{}", self.display_text).as_str(), Message::Add).width(Length::Fill);
         // let horizontal_1 = horizontal_space(Length::Fill);
         // let display_text_btn = button(self.display_text.as_str())
@@ -319,118 +317,118 @@ impl Application for CalculatorGUI {
         // .on_press(Message::Typing);
 
         let ce_btn = button("CE")
-        .style(theme::Button::Text)
+        .style(theme::Button::Secondary)
         .on_press(Message::CE);
         // ce_btn.style(Color::from_rgb8(0x88, 0x88, 0x88))
         let del_btn = button("DEL")
-        .style(theme::Button::Text)
+        .style(theme::Button::Secondary)
         .on_press(Message::Del);
 
         let caret_btn = button("^")
-        .style(theme::Button::Text)
+        .style(theme::Button::Secondary)
         .on_press(Message::Caret);
 
         let mod_btn = button("%")
-        .style(theme::Button::Text)
+        .style(theme::Button::Secondary)
         .on_press(Message::Mod);
 
         let sin_btn = button("Sin")
-        .style(theme::Button::Text)
+        .style(theme::Button::Secondary)
         .on_press(Message::Sin);
 
         let cos_btn = button("Cos")
-        .style(theme::Button::Text)
+        .style(theme::Button::Secondary)
         .on_press(Message::Cos);
 
         let tan_btn = button("Tan")
-        .style(theme::Button::Text)
+        .style(theme::Button::Secondary)
         .on_press(Message::Tan);
 
         let left_paren_btn = 
             button("(")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::LeftParen);
 
         let right_paren_btn = 
             button(")")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::RightParen);
 
         let factorial_btn = 
             button("n!")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Factorial);
 
         let add_btn = 
             button("+")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Add);
 
         let subtract_btn = 
             button("-")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Subtract);
 
         let multiply_btn = 
             button("x")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Multiply);
         
         let divide_btn = 
             button("÷")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Divide);
         
         let equals_btn = button("=")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Equals);
 
         let one_btn = button("1")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::One);
 
         let two_btn = button("2")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Two);
 
         let three_btn = button("3")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Three);
 
         let four_btn = button("4")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Four);;
 
         let five_btn = button("5")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Five);
 
         let six_btn = button("6")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Six);
         
         let seven_btn = button("7")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Seven);
 
         let eight_btn = button("8")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Eight);
 
         let nine_btn = button("9")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Nine);
     
         let zero_btn = button("0")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Zero);
 
         let negate_btn = button("+/-")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Negate);
 
         let decimal_btn = button(".")
-            .style(theme::Button::Text)
+            .style(theme::Button::Secondary)
             .on_press(Message::Decimal);
 
         // let display_frame = Frame::new(Size { width: 500.0, height: 500.0 });
@@ -471,12 +469,19 @@ impl Application for CalculatorGUI {
             
         //     .into();
 
-        container(content)    
+        container(content)
+            // container(
+            //     container(second_row)
+            //     .padding(20)
+            //     .style(theme::Container::Bordered)
+            //     .into()
+            // )    
             .width(Length::Fill)
             .height(Length::Fill)
             .center_x()
             .center_y()
             .padding(20)
+            .style(theme::Container::Bordered)
             // .style(
             //     container::Appearance {
             //         border_width: 2.0,
@@ -486,9 +491,9 @@ impl Application for CalculatorGUI {
             .into()
     }
 
-    fn theme(&self) -> Self::Theme {
-        Self::Theme::Dark
-    }
+    // fn theme(&self) -> Self::Theme {
+    //     Self::Theme::Dark
+    // }
 }
 
 pub struct Calculator {
@@ -540,5 +545,118 @@ impl Calculator {
         }
     }
 
+}
+
+
+mod widget {
+    #![allow(dead_code)]
+    use crate::theme::Theme;
+
+    pub type Renderer = iced::Renderer<Theme>;
+    pub type Element<'a, Message> = iced::Element<'a, Message, Renderer>;
+    pub type Container<'a, Message> = iced::widget::Container<'a, Message, Renderer>;
+    pub type Button<'a, Message> = iced::widget::Button<'a, Message, Renderer>;
+}
+
+mod theme {
+    use iced::widget::{button, container, text, row};
+    use iced::{application, color, Color};
+
+    #[derive(Debug, Clone, Copy, Default)]
+    pub struct Theme;
+
+    impl application::StyleSheet for Theme {
+        type Style = ();
+
+        fn appearance(&self, _style: &Self::Style) -> application::Appearance {
+            application::Appearance {
+                background_color: color!(0x28, 0x28, 0x28),
+                text_color: color!(0xeb, 0xdb, 0xb2),
+            }
+        }
+    }
+
+    impl text::StyleSheet for Theme {
+        type Style = ();
+
+        fn appearance(&self, _style: Self::Style) -> text::Appearance {
+            text::Appearance {
+                color: color!(0xeb, 0xdb, 0xb2).into(),
+            }
+        }
+    }
+
+    #[derive(Debug, Clone, Copy, Default)]
+    pub enum Container {
+        #[default]
+        Default,
+        Bordered,
+    }
+
+    impl container::StyleSheet for Theme {
+        type Style = Container;
+
+        fn appearance(&self, style: &Self::Style) -> container::Appearance {
+            match style {
+                Container::Default => container::Appearance::default(),
+                Container::Bordered => container::Appearance {
+                    border_color: color!(0x45, 0x85, 0x88),
+                    border_width: 1.0,
+                    border_radius: 4.0,
+                    ..Default::default()
+                },
+            }
+        }
+    }
+
+    // #[derive(Debug, Clone, Copy, Default)]
+    // pub enum Row {
+    //     #[default]
+    //     Default,
+    //     Bordered,
+    // }
+
+    // impl row::StyleSheet for Theme {
+    //     type Style = Row;
+
+    //     fn appearance(&self, style: &Self::Style) -> row::Appearance {
+    //         match style {
+    //             Row::Default => row::Appearance::default(),
+    //             Row::Bordered => row::Appearance {
+    //                 border_color: color!(0x45, 0x85, 0x88),
+    //                 border_width: 1.0,
+    //                 border_radius: 4.0,
+    //                 ..Default::default()
+    //             },
+    //         }
+    //     }
+    // }
+
+    #[derive(Debug, Clone, Copy, Default)]
+    pub enum Button {
+        #[default]
+        Primary,
+        Secondary,
+    }
+
+    impl button::StyleSheet for Theme {
+        type Style = Button;
+
+        fn active(&self, style: &Self::Style) -> button::Appearance {
+            match style {
+                Button::Primary => button::Appearance {
+                    background: color!(0x28, 0x28, 0x28).into(),
+                    border_radius: 4.0,
+                    border_width: 1.0,
+                    border_color: color!(0x45, 0x85, 0x88),
+                    ..Default::default()
+                },
+                Button::Secondary => button::Appearance {
+                    background: color!(0x3c, 0x38, 0x36).into(),
+                    ..Default::default()
+                },
+            }
+        }
+    }
 }
 
