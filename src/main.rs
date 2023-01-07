@@ -306,10 +306,15 @@ impl Application for CalculatorGUI {
         let title = text("Calculator")
         .width(Length::Fill)
         .size(20)
-        // .style(Color::from([0.5, 0.5, 0.5]))
         .horizontal_alignment(alignment::Horizontal::Center);
         
-        let display_text = button(text(format!("{}", self.display_text))).style(theme::Button::Primary).width(Length::Fill);
+        let display_text = button(text(format!("{}", self.display_text)))
+            .style(theme::Button::Primary)
+            .width(Length::Fill);
+
+        // let display_text_2 = button(text(format!("{}", self.display_text)))
+            // .style(theme::Button::Primary)
+            // .width(Length::Fill);
 
         let ce_btn = button("CE")
         .style(theme::Button::Secondary)
