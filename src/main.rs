@@ -310,16 +310,11 @@ impl Application for CalculatorGUI {
         .horizontal_alignment(alignment::Horizontal::Center);
         
         let display_text = button(text(format!("{}", self.display_text))).style(theme::Button::Primary).width(Length::Fill);
-        // let display_text = text_input("", format!("{}", self.display_text).as_str(), Message::Add).width(Length::Fill);
-        // let horizontal_1 = horizontal_space(Length::Fill);
-        // let display_text_btn = button(self.display_text.as_str())
-        // .style(theme::Button::Text)
-        // .on_press(Message::Typing);
 
         let ce_btn = button("CE")
         .style(theme::Button::Secondary)
         .on_press(Message::CE);
-        // ce_btn.style(Color::from_rgb8(0x88, 0x88, 0x88))
+
         let del_btn = button("DEL")
         .style(theme::Button::Secondary)
         .on_press(Message::Del);
@@ -430,29 +425,9 @@ impl Application for CalculatorGUI {
         let decimal_btn = button(".")
             .style(theme::Button::Secondary)
             .on_press(Message::Decimal);
-
-        // let display_frame = Frame::new(Size { width: 500.0, height: 500.0 });
-        // display_frame.stroke(
-        //     &Path::rectangle(Point::ORIGIN, display_frame.size()),
-        //     Stroke::default().with_width(2.0)
-        // );
-        // display_frame.fill_text(display_text.into()).into();
-        // display_frame.
-        // display_frame
-        //  {
-        //         Curve::draw_all(self.curves, frame);
-
-        //         frame.stroke(
-        //             &Path::rectangle(Point::ORIGIN, frame.size()),
-        //             Stroke::default().with_width(2.0),
-        // );
-        // };
-
             
         let first_row = row![title].spacing(20).padding(10).align_items(Alignment::Start);
         let second_row = row![display_text].padding(32).align_items(Alignment::Start);
-        // let second_row = row![output_text];
-        // let third_row = row![].spacing(20);
         let fourth_row = row![sin_btn, cos_btn, tan_btn, del_btn, ce_btn].spacing(5);
         let fifth_row = row![factorial_btn, mod_btn, negate_btn, caret_btn, left_paren_btn, right_paren_btn].spacing(13);
         let sixth_row = row![seven_btn, eight_btn, nine_btn, divide_btn].spacing(20);
@@ -463,37 +438,17 @@ impl Application for CalculatorGUI {
         let content = column![first_row, second_row, fourth_row, fifth_row, sixth_row, seventh_row, eighth_row, ninth_row]
             .align_items(Alignment::Center)
             .spacing(20);
-        
-        // let container_1 = container(second_row)
-        //     .padding(20)
-            
-        //     .into();
 
         container(content)
-            // container(
-            //     container(second_row)
-            //     .padding(20)
-            //     .style(theme::Container::Bordered)
-            //     .into()
-            // )    
             .width(Length::Fill)
             .height(Length::Fill)
             .center_x()
             .center_y()
             .padding(20)
             .style(theme::Container::Bordered)
-            // .style(
-            //     container::Appearance {
-            //         border_width: 2.0,
-            //         ..Default::default()
-            //     }
-            // )
             .into()
     }
 
-    // fn theme(&self) -> Self::Theme {
-    //     Self::Theme::Dark
-    // }
 }
 
 pub struct Calculator {
@@ -608,29 +563,6 @@ mod theme {
             }
         }
     }
-
-    // #[derive(Debug, Clone, Copy, Default)]
-    // pub enum Row {
-    //     #[default]
-    //     Default,
-    //     Bordered,
-    // }
-
-    // impl row::StyleSheet for Theme {
-    //     type Style = Row;
-
-    //     fn appearance(&self, style: &Self::Style) -> row::Appearance {
-    //         match style {
-    //             Row::Default => row::Appearance::default(),
-    //             Row::Bordered => row::Appearance {
-    //                 border_color: color!(0x45, 0x85, 0x88),
-    //                 border_width: 1.0,
-    //                 border_radius: 4.0,
-    //                 ..Default::default()
-    //             },
-    //         }
-    //     }
-    // }
 
     #[derive(Debug, Clone, Copy, Default)]
     pub enum Button {
