@@ -312,10 +312,6 @@ impl Application for CalculatorGUI {
             .style(theme::Button::Primary)
             .width(Length::Fill);
 
-        // let display_text_2 = button(text(format!("{}", self.display_text)))
-            // .style(theme::Button::Primary)
-            // .width(Length::Fill);
-
         let ce_btn = button("CE")
         .style(theme::Button::Secondary)
         .on_press(Message::CE);
